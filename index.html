@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>托育人員管理系統</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#FDB813',
+            primaryDark: '#E5A511',
+            secondary: '#FEF3C7',
+            accent: '#FBBF24',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 min-h-screen">
+  <div id="app"></div>
+
+  <script>
+    // Supabase 設定
+    const SUPABASE_URL = 'https://utszytwaabadivssondj.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0c3p5dHdhYWJhZGl2c3NvbmRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzMzQ1MDIsImV4cCI6MjA3NzkxMDUwMn0.Tq2RlCaOegGV7I8jYqgFLHOLpm-bic1RTuIpRzuwqaY';
+
+    // 圖示 SVG
+    const icons = {
+      home: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>',
+      user: '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>',
+      logout: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>',
+      news: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"></path><path d="M18 14h-8"></path><path d="M15 18h-5"></path><path d="M10 6h8v4h-8V6Z"></path></svg>',
+      megaphone: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path></svg>'
+    };
+
+    // 狀態管理
+    let state = {
+      user: null,
+      providerData: null,
+      news: [],
+      currentPage: 'home',
+      error: ''
+    };
+
+    // 初始化
+    function init() {
+      checkUser();
+      fetchNews();
+      render();
+    }
+
+    // 檢查登入狀態
+    function checkUser() {
+      const storedUser = sessionStorage.getItem('childcare_user');
+      if (storedUser) {
+        state.user = JSON.parse(storedUser);
+        fetchProviderData();
+      }
+    }
+
+    // 獲取最新消息
+    async function fetchNews() {
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/news?select=*&order=published_date.desc`, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        });
+        if (response.ok) {
+          state.news = await response.json();
+          render();
+        }
+      } catch (error) {
+        console.error('獲取消息失敗:', error);
+      }
+    }
+
+    // 獲取托育人員資料
+    async function fetchProviderData() {
+      if (!state.user) return;
+      
+      try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/child_care_providers?user_id=eq.${state.user.id}&select=*`, {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${state.user.token}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          state.providerData = data[0];
+          render();
+        }
+      } catch (error) {
+        console.error('獲取資料失敗:', error);
+      }
+    }
+
+    // 登入
+    async function handleLogin(email, password) {
+      state.error = '';
+      if (!email || !password) {
+        state.error = '請輸入帳號和密碼';
+        render();
+        return;
+      }
+
+      try {
+        const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password })
+        });
+        
+        const data = await response.json();
+        
+        if (data.access_token) {
+          state.user = { 
+            id: data.user.id, 
+            email: data.user.email, 
+            token: data.access_token 
+          };
+          sessionStorage.setItem('childcare_user', JSON.stringify(state.user));
+          state.currentPage = 'profile';
+          await fetchProviderData();
+        } else {
+          state.error = '帳號或密碼錯誤';
+          render();
+        }
+      } catch (error) {
+        state.error = '登入失敗，請稍後再試';
+        render();
+      }
+    }
+
+    // 登出
+    function handleLogout() {
+      state.user = null;
+      state.providerData = null;
+      state.currentPage = 'home';
+      sessionStorage.removeItem('childcare_user');
+      render();
+    }
+
+    // 切換頁面
+    function navigateTo(page) {
+      state.currentPage = page;
+      state.error = '';
+      render();
+    }
+
+    // 渲染頁面
+    function render() {
+      const app = document.getElementById('app');
+      
+      app.innerHTML = `
+        <!-- 導航列 -->
+        <nav class="bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 shadow-lg">
+          <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+              <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-md">
+                  <span class="text-2xl">👶</span>
+                </div>
+                <div>
+                  <h1 class="text-2xl font-bold text-white drop-shadow-md">托育人員管理系統</h1>
+                  <p class="text-xs text-yellow-100">Child Care Provider System</p>
+                </div>
+              </div>
+              
+              <div class="flex items-center space-x-4">
+                ${state.user ? `
+                  <button onclick="navigateTo('home')" class="flex items-center space-x-2 px-4 py-2 rounded-lg transition ${state.currentPage === 'home' ? 'bg-white text-yellow-600' : 'text-white hover:bg-yellow-500'}">
+                    ${icons.home}
+                    <span class="hidden sm:inline">首頁</span>
+                  </button>
+                  <button onclick="navigateTo('profile')" class="flex items-center space-x-2 px-4 py-2 rounded-lg transition ${state.currentPage === 'profile' ? 'bg-white text-yellow-600' : 'text-white hover:bg-yellow-500'}">
+                    ${icons.user}
+                    <span class="hidden sm:inline">個人資料</span>
+                  </button>
+                  <button onclick="handleLogout()" class="flex items-center space-x-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
+                    ${icons.logout}
+                    <span class="hidden sm:inline">登出</span>
+                  </button>
+                ` : `
+                  <button onclick="navigateTo('home')" class="flex items-center space-x-2 px-4 py-2 rounded-lg transition ${state.currentPage === 'home' ? 'bg-white text-yellow-600' : 'text-white hover:bg-yellow-500'}">
+                    ${icons.home}
+                    <span>首頁</span>
+                  </button>
+                  <button onclick="navigateTo('login')" class="px-6 py-2 bg-white text-yellow-600 rounded-lg font-semibold hover:bg-yellow-50 transition shadow-md">
+                    登入
+                  </button>
+                `}
+              </div>
+            </div>
+          </div>
+        </nav>
+
+        <!-- 主要內容 -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          ${state.currentPage === 'home' ? renderHomePage() : ''}
+          ${state.currentPage === 'login' ? renderLoginPage() : ''}
+          ${state.currentPage === 'profile' ? renderProfilePage() : ''}
+        </main>
+
+        <!-- 頁尾 -->
+        <footer class="bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 mt-20">
+          <div class="max-w-7xl mx-auto px-4 py-8 text-center text-white">
+            <p class="text-sm">© 2024 托育人員管理系統 | Child Care Provider System</p>
+            <p class="text-xs mt-2 text-yellow-100">提供專業、安全、溫馨的托育服務</p>
+          </div>
+        </footer>
+      `;
+    }
+
+    // 首頁
+    function renderHomePage() {
+      const latestNews = state.news.filter(n => n.category === '最新消息');
+      const policies = state.news.filter(n => n.category === '政策宣導');
+      
+      return `
+        <div class="space-y-8">
+          <!-- 歡迎橫幅 -->
+          <div class="bg-gradient-to-r from-yellow-300 via-amber-300 to-yellow-400 rounded-2xl shadow-xl p-8 md:p-12 text-center">
+            <h2 class="text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg">歡迎來到托育人員管理系統</h2>
+            <p class="text-lg md:text-xl text-yellow-50 mb-6">提供專業的托育服務資訊與管理平台</p>
+            ${!state.user ? `
+              <button onclick="navigateTo('login')" class="px-8 py-3 bg-white text-yellow-600 rounded-full font-bold text-lg hover:bg-yellow-50 transition shadow-lg transform hover:scale-105">
+                立即登入 →
+              </button>
+            ` : ''}
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-8">
+            <!-- 最新消息 -->
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden border-t-4 border-yellow-400">
+              <div class="bg-gradient-to-r from-yellow-400 to-amber-400 px-6 py-4 flex items-center space-x-3">
+                <div class="text-white">${icons.news}</div>
+                <h3 class="text-2xl font-bold text-white">最新消息</h3>
+              </div>
+              <div class="p-6 space-y-4">
+                ${latestNews.length === 0 ? '<p class="text-gray-500 text-center py-8">目前沒有最新消息</p>' : ''}
+                ${latestNews.map(news => `
+                  <div class="border-l-4 border-yellow-400 pl-4 py-2 hover:bg-yellow-50 transition rounded">
+                    <h4 class="font-semibold text-gray-800 mb-1">${news.title}</h4>
+                    <p class="text-sm text-gray-600 mb-2">${news.content}</p>
+                    <p class="text-xs text-gray-400">${new Date(news.published_date).toLocaleDateString('zh-TW')}</p>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- 政策宣導 -->
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden border-t-4 border-amber-500">
+              <div class="bg-gradient-to-r from-amber-500 to-yellow-500 px-6 py-4 flex items-center space-x-3">
+                <div class="text-white">${icons.megaphone}</div>
+                <h3 class="text-2xl font-bold text-white">政策宣導</h3>
+              </div>
+              <div class="p-6 space-y-4">
+                ${policies.length === 0 ? '<p class="text-gray-500 text-center py-8">目前沒有政策宣導</p>' : ''}
+                ${policies.map(news => `
+                  <div class="border-l-4 border-amber-500 pl-4 py-2 hover:bg-amber-50 transition rounded">
+                    <h4 class="font-semibold text-gray-800 mb-1">${news.title}</h4>
+                    <p class="text-sm text-gray-600 mb-2">${news.content}</p>
+                    <p class="text-xs text-gray-400">${new Date(news.published_date).toLocaleDateString('zh-TW')}</p>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // 登入頁面
+    function renderLoginPage() {
+      return `
+        <div class="max-w-md mx-auto">
+          <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div class="bg-gradient-to-r from-yellow-400 to-amber-400 px-8 py-6 text-center">
+              <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <span class="text-4xl">🔐</span>
+              </div>
+              <h2 class="text-3xl font-bold text-white">托育人員登入</h2>
+              <p class="text-yellow-100 mt-2">請輸入您的帳號密碼</p>
+            </div>
+            
+            <div class="p-8">
+              ${state.error ? `
+                <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
+                  ${state.error}
+                </div>
+              ` : ''}
+              
+              <div class="space-y-6">
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">電子郵件</label>
+                  <input type="email" id="email" placeholder="provider1@example.com"
+                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-yellow-400 focus:outline-none transition">
+                </div>
+                
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">密碼</label>
+                  <input type="password" id="password" placeholder="請輸入密碼"
+                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-yellow-400 focus:outline-none transition">
+                </div>
+                
+                <button onclick="handleLogin(document.getElementById('email').value, document.getElementById('password').value)"
+                        class="w-full py-3 bg-gradient-to-r from-yellow-400 to-amber-400 text-white font-bold rounded-lg hover:from-yellow-500 hover:to-amber-500 transition shadow-lg transform hover:scale-105">
+                  登入
+                </button>
+              </div>
+              
+              <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p class="text-sm text-gray-600">
+                  <strong class="text-yellow-700">測試帳號：</strong><br>
+                  Email: provider1@example.com<br>
+                  密碼: password123
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // 個人資料頁面
+    function renderProfilePage() {
+      if (!state.user) {
+        navigateTo('login');
+        return '';
+      }
+      
+      if (!state.providerData) {
+        return `
+          <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-12 text-center">
+            <div class="animate-spin w-16 h-16 border-4 border-yellow-400 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p class="text-gray-600">載入中...</p>
+          </div>
+        `;
+      }
+      
+      return `
+        <div class="max-w-4xl mx-auto">
+          <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+            <div class="bg-gradient-to-r from-yellow-400 to-amber-400 px-8 py-12 text-center">
+              <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl border-4 border-yellow-200">
+                <span class="text-6xl">${state.providerData.gender === '男' ? '👨‍🏫' : '👩‍🏫'}</span>
+              </div>
+              <h2 class="text-4xl font-bold text-white mb-2">${state.providerData.name}</h2>
+              <p class="text-yellow-100 text-lg">@${state.providerData.account}</p>
+            </div>
+            
+            <div class="p-8 space-y-6">
+              <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-gradient-to-br from-yellow-50 to-amber-50 p-6 rounded-xl border-2 border-yellow-200">
+                  <p class="text-sm font-semibold text-gray-600 mb-2">性別</p>
+                  <p class="text-2xl font-bold text-gray-800">${state.providerData.gender}</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-yellow-50 to-amber-50 p-6 rounded-xl border-2 border-yellow-200">
+                  <p class="text-sm font-semibold text-gray-600 mb-2">帳號</p>
+                  <p class="text-2xl font-bold text-gray-800">${state.providerData.account}</p>
+                </div>
+              </div>
+              
+              <div class="bg-gradient-to-br from-yellow-50 to-amber-50 p-6 rounded-xl border-2 border-yellow-200">
+                <p class="text-sm font-semibold text-gray-600 mb-3">個人簡介</p>
+                <p class="text-gray-700 leading-relaxed text-lg">${state.providerData.introduction}</p>
+              </div>
+              
+              <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                <p class="text-xs text-gray-500">
+                  建立時間：${new Date(state.providerData.created_at).toLocaleString('zh-TW')}<br>
+                  最後更新：${new Date(state.providerData.updated_at).toLocaleString('zh-TW')}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // 啟動應用
+    init();
+  </script>
+</body>
+</html>
