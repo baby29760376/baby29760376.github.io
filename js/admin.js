@@ -1,108 +1,126 @@
 // 管理員相關函數
 
-// 獲取所有托育人員（管理員用）
-async function fetchAllProvidersForAdmin() {
+// 獲取管理員資料
+async function fetchAdminData() {
   if (!state.user) return;
-
+  
   try {
-    const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/child_care_providers?select=*`,
-      {
-        headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${state.user.token}`
-        }
+    const adminRes = await fetch(`${SUPABASE_URL}/rest/v1/admins?user_id=eq.${state.user.id}&select=*`, {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${state.user.token}`
       }
-    );
-
-    if (response.ok) {
-      state.allProviders = await response.json();
-      await fetchAdminStats();
-      await fetchCommentCounts();
-      render();
+    });
+    
+    if (adminRes.ok) {
+      const adminData = await adminRes.json();
+      state.adminData = adminData[0];
     }
+
+    await fetchAllProvidersWithStats();
+    render();
   } catch (error) {
-    console.error('獲取托育人員列表失敗:', error);
+    console.error('獲取管理員資料失敗:', error);
   }
 }
 
-// 獲取管理員統計資料
-async function fetchAdminStats() {
+// 獲取所有托育人員及其統計
+async function fetchAllProvidersWithStats() {
   if (!state.user) return;
-
+  
   try {
-    // 獲取總家長數
-    const parentsResponse = await fetch(
-      `${SUPABASE_URL}/rest/v1/parents?select=id`,
-      {
-        headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${state.user.token}`
-        }
+    const providersRes = await fetch(`${SUPABASE_URL}/rest/v1/child_care_providers?select=*&order=name`, {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${state.user.token}`
       }
-    );
-
-    if (parentsResponse.ok) {
-      const parents = await parentsResponse.json();
-      state.adminStats.totalParents = parents.length;
+    });
+    
+    if (!providersRes.ok) return;
+    
+    const providers = await providersRes.json();
+    
+    const statsRes = await fetch(`${SUPABASE_URL}/rest/v1/provider_evaluation_stats?select=*`, {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${state.user.token}`
+      }
+    });
+    
+    let stats = [];
+    if (statsRes.ok) {
+      stats = await statsRes.json();
     }
+    
+    state.allProviders = providers.map(provider => {
+      const stat = stats.find(s => s.provider_id === provider.id);
+      return {
+        ...provider,
+        stats: stat || {
+          total_hearts: 0,
+          total_parents: 0,
+          communication_hearts: 0,
+          activity_hearts: 0,
+          routine_hearts: 0,
+          relationship_hearts: 0
+        }
+      };
+    });
+    
+    await fetchParentStats();
+    await fetchCommentCounts();
+  } catch (error) {
+    console.error('獲取托育人員統計失敗:', error);
+  }
+}
 
-    // 獲取已評價的家長數
-    const evaluationsResponse = await fetch(
-      `${SUPABASE_URL}/rest/v1/evaluations?select=parent_user_id`,
-      {
+// 獲取家長統計
+async function fetchParentStats() {
+  if (!state.user) return;
+  
+  try {
+    const parentsRes = await fetch(`${SUPABASE_URL}/rest/v1/parents?select=user_id`, {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${state.user.token}`
+      }
+    });
+    
+    let totalParents = 0;
+    let evaluatedParents = 0;
+    
+    if (parentsRes.ok) {
+      const parents = await parentsRes.json();
+      totalParents = parents.length;
+      
+      const evaluationsRes = await fetch(`${SUPABASE_URL}/rest/v1/evaluations?select=parent_user_id`, {
         headers: {
           'apikey': SUPABASE_ANON_KEY,
           'Authorization': `Bearer ${state.user.token}`
         }
-      }
-    );
-
-    if (evaluationsResponse.ok) {
-      const evaluations = await evaluationsResponse.json();
-      const uniqueParents = new Set(evaluations.map(e => e.parent_user_id));
-      state.adminStats.evaluatedParents = uniqueParents.size;
-    }
-
-    // 獲取統計資料
-    const statsResponse = await fetch(
-      `${SUPABASE_URL}/rest/v1/provider_evaluation_stats?select=*`,
-      {
-        headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${state.user.token}`
-        }
-      }
-    );
-
-    if (statsResponse.ok) {
-      const stats = await statsResponse.json();
-      state.allProviders = state.allProviders.map(provider => {
-        const providerStats = stats.find(s => s.provider_id === provider.id);
-        return {
-          ...provider,
-          stats: providerStats || {
-            total_hearts: 0,
-            total_parents: 0,
-            communication_hearts: 0,
-            activity_hearts: 0,
-            routine_hearts: 0,
-            relationship_hearts: 0
-          }
-        };
       });
+      
+      if (evaluationsRes.ok) {
+        const evaluations = await evaluationsRes.json();
+        const uniqueParents = new Set(evaluations.map(e => e.parent_user_id));
+        evaluatedParents = uniqueParents.size;
+      }
     }
+    
+    state.adminStats.totalParents = totalParents;
+    state.adminStats.evaluatedParents = evaluatedParents;
+    render();
   } catch (error) {
-    console.error('獲取統計失敗:', error);
+    console.error('獲取家長統計失敗:', error);
   }
 }
 
-// 獲取留言數量
+// 獲取每位托育人員的留言數量
 async function fetchCommentCounts() {
   if (!state.user) return;
-
+  
   try {
-    const response = await fetch(
+    const commentsRes = await fetch(
       `${SUPABASE_URL}/rest/v1/parent_comments?select=provider_id`,
       {
         headers: {
@@ -111,33 +129,35 @@ async function fetchCommentCounts() {
         }
       }
     );
-
-    if (response.ok) {
-      const comments = await response.json();
+    
+    if (commentsRes.ok) {
+      const comments = await commentsRes.json();
       const commentCounts = {};
       
       comments.forEach(comment => {
         commentCounts[comment.provider_id] = (commentCounts[comment.provider_id] || 0) + 1;
       });
-
-      state.allProviders = state.allProviders.map(provider => ({
-        ...provider,
-        commentCount: commentCounts[provider.id] || 0
-      }));
+      
+      setTimeout(() => {
+        state.allProviders.forEach(provider => {
+          const count = commentCounts[provider.id] || 0;
+          const el = document.getElementById(`comment-count-${provider.id}`);
+          if (el) el.textContent = count;
+        });
+      }, 100);
     }
   } catch (error) {
     console.error('獲取留言數量失敗:', error);
   }
 }
 
-// 獲取托育人員詳細資料（管理員用）
+// 獲取特定托育人員的詳細評價
 async function fetchProviderDetailForAdmin(providerId) {
   if (!state.user) return;
-
+  
   try {
-    // 獲取所有評價明細
-    const evaluationsResponse = await fetch(
-      `${SUPABASE_URL}/rest/v1/evaluations?provider_id=eq.${providerId}&select=*,parents(name)`,
+    const evaluationsRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/evaluations?provider_id=eq.${providerId}&select=*`,
       {
         headers: {
           'apikey': SUPABASE_ANON_KEY,
@@ -145,14 +165,13 @@ async function fetchProviderDetailForAdmin(providerId) {
         }
       }
     );
-
-    if (evaluationsResponse.ok) {
-      state.providerEvaluationsDetail = await evaluationsResponse.json();
-    }
-
-    // 獲取所有留言
-    const commentsResponse = await fetch(
-      `${SUPABASE_URL}/rest/v1/parent_comments?provider_id=eq.${providerId}&select=*,parents(name)`,
+    
+    if (!evaluationsRes.ok) return;
+    
+    const evaluations = await evaluationsRes.json();
+    
+    const commentsRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/parent_comments?provider_id=eq.${providerId}&select=*`,
       {
         headers: {
           'apikey': SUPABASE_ANON_KEY,
@@ -160,68 +179,189 @@ async function fetchProviderDetailForAdmin(providerId) {
         }
       }
     );
-
-    if (commentsResponse.ok) {
-      state.providerComments = await commentsResponse.json();
+    
+    let comments = [];
+    if (commentsRes.ok) {
+      comments = await commentsRes.json();
     }
-
+    
+    const parentIds = [...new Set([
+      ...evaluations.map(e => e.parent_user_id),
+      ...comments.map(c => c.parent_user_id)
+    ])];
+    
+    if (parentIds.length > 0) {
+      const parentsRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/parents?user_id=in.(${parentIds.join(',')})&select=*`,
+        {
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${state.user.token}`
+          }
+        }
+      );
+      
+      if (parentsRes.ok) {
+        const parents = await parentsRes.json();
+        
+        state.providerEvaluationsDetail = evaluations.map(evaluation => {
+          const parent = parents.find(p => p.user_id === evaluation.parent_user_id);
+          const comment = comments.find(c => c.parent_user_id === evaluation.parent_user_id);
+          return {
+            ...evaluation,
+            parent_name: parent ? parent.name : '未知家長',
+            comment: comment ? comment.comment : null,
+            comment_id: comment ? comment.id : null
+          };
+        });
+        
+        comments.forEach(comment => {
+          const hasEvaluation = evaluations.some(e => e.parent_user_id === comment.parent_user_id);
+          if (!hasEvaluation) {
+            const parent = parents.find(p => p.user_id === comment.parent_user_id);
+            state.providerEvaluationsDetail.push({
+              parent_user_id: comment.parent_user_id,
+              parent_name: parent ? parent.name : '未知家長',
+              comment: comment.comment,
+              comment_id: comment.id,
+              updated_at: comment.updated_at,
+              communication_1: false,
+              communication_2: false,
+              communication_3: false,
+              communication_4: false,
+              communication_5: false,
+              activity_1: false,
+              activity_2: false,
+              activity_3: false,
+              activity_4: false,
+              activity_5: false,
+              routine_1: false,
+              routine_2: false,
+              routine_3: false,
+              routine_4: false,
+              routine_5: false,
+              relationship_1: false,
+              relationship_2: false,
+              relationship_3: false,
+              relationship_4: false,
+              relationship_5: false
+            });
+          }
+        });
+      }
+    } else {
+      state.providerEvaluationsDetail = [];
+    }
+    
     render();
   } catch (error) {
-    console.error('獲取詳細資料失敗:', error);
+    console.error('獲取評價詳細資料失敗:', error);
   }
+}
+
+// 選擇托育人員（管理員視角）
+async function selectProviderForAdmin(provider) {
+  state.selectedProviderForAdmin = provider;
+  await fetchProviderDetailForAdmin(provider.id);
+  state.currentPage = 'admin-provider-detail';
+  render();
+}
+
+// 計算家長給的愛心數
+function calculateParentHearts(evaluation) {
+  const categories = ['communication', 'activity', 'routine', 'relationship'];
+  const result = {};
+  
+  categories.forEach(category => {
+    const items = EVALUATION_ITEMS[category];
+    let count = 0;
+    items.forEach(item => {
+      if (evaluation[item.key]) count++;
+    });
+    result[category] = count;
+  });
+  
+  result.total = result.communication + result.activity + result.routine + result.relationship;
+  return result;
 }
 
 // 渲染管理員總覽頁面
 function renderAdminDashboard() {
-  return `
-    <div class="max-w-7xl mx-auto">
-      <h2 class="text-3xl font-bold text-gray-800 mb-8">管理總覽</h2>
+  if (!state.user || state.userRole !== 'admin') {
+    navigateTo('login');
+    return '';
+  }
 
-      <div class="grid md:grid-cols-3 gap-6 mb-8">
-        <div class="bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl shadow-xl p-8 text-white">
-          <h3 class="text-lg font-semibold mb-2">托育人員總數</h3>
-          <p class="text-5xl font-bold">${state.allProviders.length}</p>
-        </div>
-        <div class="bg-gradient-to-br from-green-400 to-green-600 rounded-2xl shadow-xl p-8 text-white">
-          <h3 class="text-lg font-semibold mb-2">家長總數</h3>
-          <p class="text-5xl font-bold">${state.adminStats.totalParents}</p>
-        </div>
-        <div class="bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl shadow-xl p-8 text-white">
-          <h3 class="text-lg font-semibold mb-2">已評價家長數</h3>
-          <p class="text-5xl font-bold">${state.adminStats.evaluatedParents}</p>
-        </div>
+  if (state.allProviders.length === 0) {
+    return `
+      <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-12 text-center">
+        <div class="animate-spin w-16 h-16 border-4 border-yellow-400 border-t-transparent rounded-full mx-auto mb-4"></div>
+        <p class="text-gray-600">載入中...</p>
       </div>
+    `;
+  }
 
+  return `
+    <div class="max-w-6xl mx-auto">
       <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
-        <div class="bg-gradient-to-r from-purple-400 to-purple-600 px-8 py-6">
-          <h3 class="text-2xl font-bold text-white">托育人員列表</h3>
+        <div class="bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 px-8 py-6">
+          <h2 class="text-3xl font-bold text-white flex items-center gap-3">
+            <span>📊</span>
+            托育人員管理總覽
+          </h2>
+          <p class="text-purple-100 mt-2">查看所有托育人員的評價統計</p>
         </div>
+
         <div class="p-8">
-          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="grid md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border-2 border-blue-200 text-center">
+              <p class="text-sm font-semibold text-gray-600 mb-2">托育人員總數</p>
+              <p class="text-5xl font-bold text-blue-500">${state.allProviders.length}</p>
+              <p class="text-xs text-gray-500 mt-2">位托育人員</p>
+            </div>
+            <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl border-2 border-green-200 text-center">
+              <p class="text-sm font-semibold text-gray-600 mb-2">家長總數</p>
+              <p class="text-5xl font-bold text-green-500">${state.adminStats.totalParents}</p>
+              <p class="text-xs text-gray-500 mt-2">位家長</p>
+            </div>
+            <div class="bg-gradient-to-br from-purple-50 to-pink-50 p-6 rounded-xl border-2 border-purple-200 text-center">
+              <p class="text-sm font-semibold text-gray-600 mb-2">已評價的家長人數</p>
+              <p class="text-5xl font-bold text-purple-500">${state.adminStats.evaluatedParents}</p>
+              <p class="text-xs text-gray-500 mt-2">位已給予評價</p>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">托育人員列表</h3>
             ${state.allProviders.map(provider => `
-              <div class="border-2 border-gray-200 rounded-xl p-6 hover:border-purple-400 hover:shadow-lg transition cursor-pointer"
-                   onclick="selectProviderForAdmin('${provider.id}')">
-                <div class="flex items-center mb-4">
-                  <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mr-4">
-                    <span class="text-3xl">${provider.gender === '男' ? '👨‍🏫' : '👩‍🏫'}</span>
+              <div class="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-6 border-2 border-yellow-200 hover:border-yellow-400 hover:shadow-lg transition cursor-pointer"
+                   onclick="selectProviderForAdmin(${JSON.stringify(provider).replace(/"/g, '&quot;')})">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md">
+                      <span class="text-3xl">${provider.gender === '男' ? '👨‍🏫' : '👩‍🏫'}</span>
+                    </div>
+                    <div>
+                      <h4 class="text-xl font-bold text-gray-800">${provider.name}</h4>
+                      <p class="text-sm text-gray-600">${provider.gender} · @${provider.account}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 class="font-bold text-lg text-gray-800">${provider.name}</h4>
-                    <p class="text-sm text-gray-500">@${provider.account}</p>
-                  </div>
-                </div>
-                <div class="grid grid-cols-2 gap-2 text-sm">
-                  <div class="bg-pink-50 p-2 rounded">
-                    <p class="text-pink-600 font-bold">${provider.stats?.total_hearts || 0}</p>
-                    <p class="text-gray-600">總愛心</p>
-                  </div>
-                  <div class="bg-blue-50 p-2 rounded">
-                    <p class="text-blue-600 font-bold">${provider.stats?.total_parents || 0}</p>
-                    <p class="text-gray-600">評價數</p>
-                  </div>
-                  <div class="bg-orange-50 p-2 rounded col-span-2">
-                    <p class="text-orange-600 font-bold">${provider.commentCount || 0}</p>
-                    <p class="text-gray-600">留言數</p>
+                  <div class="flex items-center gap-6">
+                    <div class="text-center">
+                      <p class="text-3xl font-bold text-red-500">${provider.stats.total_hearts || 0}</p>
+                      <p class="text-xs text-gray-500">總愛心</p>
+                    </div>
+                    <div class="text-center">
+                      <p class="text-3xl font-bold text-blue-500">${provider.stats.total_parents || 0}</p>
+                      <p class="text-xs text-gray-500">評價人數</p>
+                    </div>
+                    <div class="text-center">
+                      <p class="text-3xl font-bold text-orange-500" id="comment-count-${provider.id}">-</p>
+                      <p class="text-xs text-gray-500">留言</p>
+                    </div>
+                    <button class="px-6 py-2 bg-gradient-to-r from-yellow-400 to-amber-400 text-white font-semibold rounded-lg hover:from-yellow-500 hover:to-amber-500 transition">
+                      查看詳情 →
+                    </button>
                   </div>
                 </div>
               </div>
@@ -233,111 +373,171 @@ function renderAdminDashboard() {
   `;
 }
 
-// 渲染托育人員詳細頁面（管理員用）
+// 渲染管理員查看托育人員詳細頁面
 function renderAdminProviderDetail() {
-  const provider = state.allProviders.find(p => p.id === state.selectedProviderForAdmin);
-  if (!provider) return '';
+  if (!state.selectedProviderForAdmin) {
+    navigateTo('admin-dashboard');
+    return '';
+  }
+
+  const provider = state.selectedProviderForAdmin;
+  const stats = provider.stats;
 
   return `
-    <div class="max-w-6xl mx-auto">
-      <button onclick="navigateTo('admin-dashboard')" 
-              class="mb-6 px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
-        ← 返回總覽
-      </button>
-
-      <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
-        <div class="bg-gradient-to-r from-purple-400 to-purple-600 p-8 text-center">
-          <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <span class="text-5xl">${provider.gender === '男' ? '👨‍🏫' : '👩‍🏫'}</span>
+    <div class="max-w-5xl mx-auto">
+      <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div class="bg-gradient-to-r from-purple-400 to-pink-400 px-8 py-8">
+          <button onclick="navigateTo('admin-dashboard')" class="text-white hover:text-purple-100 mb-4 flex items-center gap-2">
+            ← 返回總覽
+          </button>
+          <div class="flex items-center gap-6">
+            <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg">
+              <span class="text-5xl">${provider.gender === '男' ? '👨‍🏫' : '👩‍🏫'}</span>
+            </div>
+            <div>
+              <h2 class="text-3xl font-bold text-white mb-2">${provider.name}</h2>
+              <p class="text-purple-100">${provider.gender} · @${provider.account}</p>
+            </div>
           </div>
-          <h2 class="text-3xl font-bold text-white">${provider.name}</h2>
-          <p class="text-purple-100">@${provider.account}</p>
         </div>
 
-        <div class="p-8">
-          <h3 class="text-2xl font-bold text-gray-800 mb-6">整體統計</h3>
-          <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-            <div class="text-center p-4 bg-pink-50 rounded-lg">
-              <p class="text-3xl font-bold text-pink-600">${provider.stats?.total_hearts || 0}</p>
-              <p class="text-sm text-gray-600">總愛心數</p>
+        <div class="p-8 space-y-8">
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="bg-gradient-to-br from-red-50 to-pink-50 p-6 rounded-xl border-2 border-red-200 text-center">
+              <p class="text-sm font-semibold text-gray-600 mb-2">總愛心數</p>
+              <p class="text-5xl font-bold text-red-500">${stats.total_hearts || 0}</p>
+              <p class="text-xs text-gray-500 mt-2">共獲得的肯定</p>
             </div>
-            <div class="text-center p-4 bg-pink-50 rounded-lg">
-              <p class="text-3xl font-bold text-pink-600">${provider.stats?.total_parents || 0}</p>
-              <p class="text-sm text-gray-600">評價人數</p>
-            </div>
-            <div class="text-center p-4 bg-blue-50 rounded-lg">
-              <p class="text-3xl font-bold text-blue-600">${provider.stats?.communication_hearts || 0}</p>
-              <p class="text-sm text-gray-600">保親溝通</p>
-            </div>
-            <div class="text-center p-4 bg-green-50 rounded-lg">
-              <p class="text-3xl font-bold text-green-600">${provider.stats?.activity_hearts || 0}</p>
-              <p class="text-sm text-gray-600">托育活動</p>
-            </div>
-            <div class="text-center p-4 bg-purple-50 rounded-lg">
-              <p class="text-3xl font-bold text-purple-600">${provider.stats?.routine_hearts || 0}</p>
-              <p class="text-sm text-gray-600">作息習慣</p>
-            </div>
-            <div class="text-center p-4 bg-orange-50 rounded-lg">
-              <p class="text-3xl font-bold text-orange-600">${provider.stats?.relationship_hearts || 0}</p>
-              <p class="text-sm text-gray-600">保親關係</p>
+            
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border-2 border-blue-200 text-center">
+              <p class="text-sm font-semibold text-gray-600 mb-2">評價人數</p>
+              <p class="text-5xl font-bold text-blue-500">${stats.total_parents || 0}</p>
+              <p class="text-xs text-gray-500 mt-2">位家長給予評價</p>
             </div>
           </div>
 
-          <h3 class="text-2xl font-bold text-gray-800 mb-6">家長評價明細</h3>
-          ${state.providerEvaluationsDetail.length === 0 ? `
-            <p class="text-gray-500 text-center py-8">尚無評價記錄</p>
-          ` : `
-            <div class="space-y-6">
-              ${state.providerEvaluationsDetail.map((evaluation, index) => {
-                const parentHearts = calculateParentHearts(evaluation);
-                const comment = state.providerComments?.find(c => c.parent_user_id === evaluation.parent_user_id);
-                
-                return `
-                  <div class="border-2 border-gray-200 rounded-xl p-6">
-                    <div class="flex justify-between items-start mb-4">
-                      <div>
-                        <h4 class="font-bold text-lg text-gray-800">${evaluation.parents?.name || '家長'}</h4>
-                        <p class="text-sm text-gray-500">${new Date(evaluation.created_at).toLocaleString('zh-TW')}</p>
-                      </div>
-                      <div class="text-right">
-                        <p class="text-3xl font-bold text-pink-600">${parentHearts}</p>
-                        <p class="text-sm text-gray-600">總愛心</p>
-                      </div>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                      <div class="bg-blue-50 p-3 rounded-lg text-center">
-                        <p class="text-xl font-bold text-blue-600">${['communication_1', 'communication_2', 'communication_3', 'communication_4', 'communication_5'].filter(k => evaluation[k]).length}</p>
-                        <p class="text-xs text-gray-600">保親溝通</p>
-                      </div>
-                      <div class="bg-green-50 p-3 rounded-lg text-center">
-                        <p class="text-xl font-bold text-green-600">${['activity_1', 'activity_2', 'activity_3', 'activity_4', 'activity_5'].filter(k => evaluation[k]).length}</p>
-                        <p class="text-xs text-gray-600">托育活動</p>
-                      </div>
-                      <div class="bg-purple-50 p-3 rounded-lg text-center">
-                        <p class="text-xl font-bold text-purple-600">${['routine_1', 'routine_2', 'routine_3', 'routine_4', 'routine_5'].filter(k => evaluation[k]).length}</p>
-                        <p class="text-xs text-gray-600">作息習慣</p>
-                      </div>
-                      <div class="bg-orange-50 p-3 rounded-lg text-center">
-                        <p class="text-xl font-bold text-orange-600">${['relationship_1', 'relationship_2', 'relationship_3', 'relationship_4', 'relationship_5'].filter(k => evaluation[k]).length}</p>
-                        <p class="text-xs text-gray-600">保親關係</p>
-                      </div>
-                    </div>
+          <div class="bg-gray-50 rounded-xl p-6">
+            <h4 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <span>📊</span>
+              四大主題獲得愛心數
+            </h4>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div class="bg-white p-4 rounded-lg border-2 border-purple-200">
+                <div class="flex justify-between items-center">
+                  <span class="font-semibold text-gray-700">一、保親溝通</span>
+                  <span class="text-2xl font-bold text-purple-500">${stats.communication_hearts || 0}</span>
+                </div>
+              </div>
 
-                    ${comment ? `
-                      <button onclick="toggleComment('${index}')" 
-                              class="w-full py-2 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition">
-                        查看留言
-                      </button>
-                      <div id="comment-${index}" class="hidden mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
-                        <p class="text-gray-700">${comment.comment}</p>
-                      </div>
-                    ` : ''}
-                  </div>
-                `;
-              }).join('')}
+              <div class="bg-white p-4 rounded-lg border-2 border-green-200">
+                <div class="flex justify-between items-center">
+                  <span class="font-semibold text-gray-700">二、托育活動安排</span>
+                  <span class="text-2xl font-bold text-green-500">${stats.activity_hearts || 0}</span>
+                </div>
+              </div>
+
+              <div class="bg-white p-4 rounded-lg border-2 border-blue-200">
+                <div class="flex justify-between items-center">
+                  <span class="font-semibold text-gray-700">三、作息安排與生活習慣</span>
+                  <span class="text-2xl font-bold text-blue-500">${stats.routine_hearts || 0}</span>
+                </div>
+              </div>
+
+              <div class="bg-white p-4 rounded-lg border-2 border-pink-200">
+                <div class="flex justify-between items-center">
+                  <span class="font-semibold text-gray-700">四、保親關係</span>
+                  <span class="text-2xl font-bold text-pink-500">${stats.relationship_hearts || 0}</span>
+                </div>
+              </div>
             </div>
-          `}
+          </div>
+
+          <div class="bg-white rounded-xl border-2 border-gray-200">
+            <div class="bg-gradient-to-r from-yellow-100 to-amber-100 px-6 py-4 border-b-2 border-yellow-200">
+              <h4 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <span>👥</span>
+                家長評價明細
+              </h4>
+            </div>
+            
+            <div class="p-6">
+              ${state.providerEvaluationsDetail.length === 0 ? `
+                <div class="text-center py-12">
+                  <div class="text-6xl mb-4">📋</div>
+                  <p class="text-gray-500 text-lg">尚未有家長評價</p>
+                </div>
+              ` : `
+                <div class="space-y-6">
+                  ${state.providerEvaluationsDetail.map(evaluation => {
+                    const hearts = calculateParentHearts(evaluation);
+                    const hasComment = evaluation.comment && evaluation.comment.trim() !== '';
+                    return `
+                      <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border-2 border-gray-200">
+                        <div class="flex items-center justify-between mb-4">
+                          <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow">
+                              <span class="text-2xl">👤</span>
+                            </div>
+                            <div>
+                              <h5 class="text-lg font-bold text-gray-800">${evaluation.parent_name}</h5>
+                              <p class="text-xs text-gray-500">評價時間：${new Date(evaluation.updated_at).toLocaleDateString('zh-TW')}</p>
+                            </div>
+                          </div>
+                          <div class="flex items-center gap-3">
+                            ${hasComment ? `
+                              <button onclick="toggleComment('comment-${evaluation.id}')" 
+                                      class="px-4 py-2 bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition flex items-center gap-2">
+                                💬 查看留言
+                              </button>
+                            ` : ''}
+                            <div class="text-center bg-white px-4 py-2 rounded-lg border-2 border-red-200">
+                              <p class="text-3xl font-bold text-red-500">${hearts.total}/20</p>
+                              <p class="text-xs text-gray-500">總愛心</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        ${hasComment ? `
+                          <div id="comment-${evaluation.id}" class="hidden mt-4 p-4 bg-orange-50 border-2 border-orange-200 rounded-lg">
+                            <div class="flex items-start gap-2 mb-2">
+                              <span class="text-lg">💬</span>
+                              <div class="flex-1">
+                                <p class="text-sm font-bold text-orange-800 mb-1">家長留言：</p>
+                                <p class="text-gray-700 whitespace-pre-wrap">${evaluation.comment}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ` : ''}
+                        
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 ${hasComment ? 'mt-4' : ''}">
+                          <div class="bg-white p-3 rounded-lg text-center border border-purple-200">
+                            <p class="text-xs text-gray-600 mb-1">保親溝通</p>
+                            <p class="text-2xl font-bold text-purple-500">${hearts.communication}/5</p>
+                            <p class="text-xs text-gray-500">${'❤️'.repeat(hearts.communication)}${'🤍'.repeat(5-hearts.communication)}</p>
+                          </div>
+                          <div class="bg-white p-3 rounded-lg text-center border border-green-200">
+                            <p class="text-xs text-gray-600 mb-1">托育活動</p>
+                            <p class="text-2xl font-bold text-green-500">${hearts.activity}/5</p>
+                            <p class="text-xs text-gray-500">${'❤️'.repeat(hearts.activity)}${'🤍'.repeat(5-hearts.activity)}</p>
+                          </div>
+                          <div class="bg-white p-3 rounded-lg text-center border border-blue-200">
+                            <p class="text-xs text-gray-600 mb-1">作息習慣</p>
+                            <p class="text-2xl font-bold text-blue-500">${hearts.routine}/5</p>
+                            <p class="text-xs text-gray-500">${'❤️'.repeat(hearts.routine)}${'🤍'.repeat(5-hearts.routine)}</p>
+                          </div>
+                          <div class="bg-white p-3 rounded-lg text-center border border-pink-200">
+                            <p class="text-xs text-gray-600 mb-1">保親關係</p>
+                            <p class="text-2xl font-bold text-pink-500">${hearts.relationship}/5</p>
+                            <p class="text-xs text-gray-500">${'❤️'.repeat(hearts.relationship)}${'🤍'.repeat(5-hearts.relationship)}</p>
+                          </div>
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              `}
+            </div>
+          </div>
         </div>
       </div>
     </div>
