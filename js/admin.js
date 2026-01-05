@@ -285,6 +285,14 @@ function calculateParentHearts(evaluation) {
   return result;
 }
 
+// 切換評分細項顯示
+function toggleEvaluationDetail(evalId) {
+  const element = document.getElementById(`eval-detail-${evalId}`);
+  if (element) {
+    element.classList.toggle('hidden');
+  }
+}
+
 // 渲染管理員總覽頁面
 function renderAdminDashboard() {
   if (!state.user || state.userRole !== 'admin') {
@@ -401,6 +409,20 @@ function renderAdminProviderDetail() {
           </div>
         </div>
 
+        <!-- 修改評分說明 -->
+        <div class="bg-blue-50 border-b-2 border-blue-200 px-8 py-4">
+          <div class="flex items-start gap-3">
+            <span class="text-2xl">ℹ️</span>
+            <div class="flex-1">
+              <p class="text-blue-800 font-semibold mb-2">評分修改說明</p>
+              <p class="text-sm text-blue-700">
+                評價資料由系統自動鎖定，若家長需要修改評分，請聯絡居托中心協助處理：<br>
+                <strong>電話：02-29760376</strong> ｜ <strong>Email：baby29760376@gmail.com</strong>
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div class="p-8 space-y-8">
           <div class="grid md:grid-cols-2 gap-6">
             <div class="bg-gradient-to-br from-red-50 to-pink-50 p-6 rounded-xl border-2 border-red-200 text-center">
@@ -468,7 +490,7 @@ function renderAdminProviderDetail() {
                 </div>
               ` : `
                 <div class="space-y-6">
-                  ${state.providerEvaluationsDetail.map(evaluation => {
+                  ${state.providerEvaluationsDetail.map((evaluation, index) => {
                     const hearts = calculateParentHearts(evaluation);
                     const hasComment = evaluation.comment && evaluation.comment.trim() !== '';
                     return `
@@ -484,6 +506,10 @@ function renderAdminProviderDetail() {
                             </div>
                           </div>
                           <div class="flex items-center gap-3">
+                            <button onclick="toggleEvaluationDetail('${evaluation.id || index}')" 
+                                    class="px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition flex items-center gap-2">
+                              📝 查看評分細項
+                            </button>
                             ${hasComment ? `
                               <button onclick="toggleComment('comment-${evaluation.id}')" 
                                       class="px-4 py-2 bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition flex items-center gap-2">
@@ -497,6 +523,7 @@ function renderAdminProviderDetail() {
                           </div>
                         </div>
                         
+                        <!-- 留言區塊 -->
                         ${hasComment ? `
                           <div id="comment-${evaluation.id}" class="hidden mt-4 p-4 bg-orange-50 border-2 border-orange-200 rounded-lg">
                             <div class="flex items-start gap-2 mb-2">
@@ -509,7 +536,65 @@ function renderAdminProviderDetail() {
                           </div>
                         ` : ''}
                         
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 ${hasComment ? 'mt-4' : ''}">
+                        <!-- 評分細項（預設隱藏） -->
+                        <div id="eval-detail-${evaluation.id || index}" class="hidden mt-4 space-y-4 bg-white p-4 rounded-lg border-2 border-blue-200">
+                          <h6 class="font-bold text-gray-800 mb-3">詳細評分項目</h6>
+                          
+                          <!-- 一、保親溝通 -->
+                          <div>
+                            <p class="font-semibold text-purple-700 mb-2">一、保親溝通 (${hearts.communication}/5)</p>
+                            <div class="space-y-1 pl-4">
+                              ${EVALUATION_ITEMS.communication.map(item => `
+                                <div class="flex items-center gap-2 text-sm">
+                                  <span class="text-lg">${evaluation[item.key] ? '❤️' : '🤍'}</span>
+                                  <span class="${evaluation[item.key] ? 'text-gray-800' : 'text-gray-400'}">${item.text}</span>
+                                </div>
+                              `).join('')}
+                            </div>
+                          </div>
+                          
+                          <!-- 二、托育活動安排 -->
+                          <div>
+                            <p class="font-semibold text-green-700 mb-2">二、托育活動安排 (${hearts.activity}/5)</p>
+                            <div class="space-y-1 pl-4">
+                              ${EVALUATION_ITEMS.activity.map(item => `
+                                <div class="flex items-center gap-2 text-sm">
+                                  <span class="text-lg">${evaluation[item.key] ? '❤️' : '🤍'}</span>
+                                  <span class="${evaluation[item.key] ? 'text-gray-800' : 'text-gray-400'}">${item.text}</span>
+                                </div>
+                              `).join('')}
+                            </div>
+                          </div>
+                          
+                          <!-- 三、作息安排與生活習慣 -->
+                          <div>
+                            <p class="font-semibold text-blue-700 mb-2">三、作息安排與生活習慣 (${hearts.routine}/5)</p>
+                            <div class="space-y-1 pl-4">
+                              ${EVALUATION_ITEMS.routine.map(item => `
+                                <div class="flex items-center gap-2 text-sm">
+                                  <span class="text-lg">${evaluation[item.key] ? '❤️' : '🤍'}</span>
+                                  <span class="${evaluation[item.key] ? 'text-gray-800' : 'text-gray-400'}">${item.text}</span>
+                                </div>
+                              `).join('')}
+                            </div>
+                          </div>
+                          
+                          <!-- 四、保親關係 -->
+                          <div>
+                            <p class="font-semibold text-pink-700 mb-2">四、保親關係 (${hearts.relationship}/5)</p>
+                            <div class="space-y-1 pl-4">
+                              ${EVALUATION_ITEMS.relationship.map(item => `
+                                <div class="flex items-center gap-2 text-sm">
+                                  <span class="text-lg">${evaluation[item.key] ? '❤️' : '🤍'}</span>
+                                  <span class="${evaluation[item.key] ? 'text-gray-800' : 'text-gray-400'}">${item.text}</span>
+                                </div>
+                              `).join('')}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <!-- 四大主題統計 -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                           <div class="bg-white p-3 rounded-lg text-center border border-purple-200">
                             <p class="text-xs text-gray-600 mb-1">保親溝通</p>
                             <p class="text-2xl font-bold text-purple-500">${hearts.communication}/5</p>
@@ -526,20 +611,4 @@ function renderAdminProviderDetail() {
                             <p class="text-xs text-gray-500">${'❤️'.repeat(hearts.routine)}${'🤍'.repeat(5-hearts.routine)}</p>
                           </div>
                           <div class="bg-white p-3 rounded-lg text-center border border-pink-200">
-                            <p class="text-xs text-gray-600 mb-1">保親關係</p>
-                            <p class="text-2xl font-bold text-pink-500">${hearts.relationship}/5</p>
-                            <p class="text-xs text-gray-500">${'❤️'.repeat(hearts.relationship)}${'🤍'.repeat(5-hearts.relationship)}</p>
-                          </div>
-                        </div>
-                      </div>
-                    `;
-                  }).join('')}
-                </div>
-              `}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-}
+                            <p class="text-xs text-gray-600 mb
