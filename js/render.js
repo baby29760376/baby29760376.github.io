@@ -12,6 +12,11 @@ function render() {
     
     ${renderFooter()}
   `;
+  
+  // 渲染完成後，如果在首頁且未登入，載入最新消息
+  if (!state.user && state.currentPage === 'home') {
+    setTimeout(() => fetchNews(), 100);
+  }
 }
 
 // 渲染導航列
@@ -94,16 +99,6 @@ function renderUnauthenticatedNav() {
 
 // 渲染當前頁面內容
 function renderCurrentPage() {
-  if (state.error) {
-    return `
-      <div class="max-w-4xl mx-auto mb-6">
-        <div class="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg">
-          ${state.error}
-        </div>
-      </div>
-    `;
-  }
-
   switch (state.currentPage) {
     case 'home':
       return renderHomePage();
@@ -167,7 +162,6 @@ function renderHomePage() {
       </div>
 
       <div class="grid md:grid-cols-2 gap-8">
-        <!-- 最新消息 -->
         <div class="bg-white rounded-2xl shadow-lg overflow-hidden border-t-4 border-yellow-400">
           <div class="bg-gradient-to-r from-yellow-400 to-amber-400 px-6 py-4">
             <h3 class="text-2xl font-bold text-white">最新消息</h3>
@@ -177,7 +171,6 @@ function renderHomePage() {
           </div>
         </div>
 
-        <!-- 政策宣導 -->
         <div class="bg-white rounded-2xl shadow-lg overflow-hidden border-t-4 border-amber-500">
           <div class="bg-gradient-to-r from-amber-500 to-yellow-500 px-6 py-4">
             <h3 class="text-2xl font-bold text-white">政策宣導</h3>
@@ -190,6 +183,7 @@ function renderHomePage() {
     </div>
   `;
 }
+
 // 渲染登入頁面
 function renderLoginPage() {
   return `
