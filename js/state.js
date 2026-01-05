@@ -17,6 +17,7 @@ let state = {
   currentComment: null,
   selectedProvider: null,
   evaluationStats: null,
+  news: [],
   currentPage: 'home',
   error: ''
 };
