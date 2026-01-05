@@ -141,43 +141,55 @@ function renderCurrentPage() {
 
 // 渲染首頁
 function renderHomePage() {
+  // 如果已登入，根據角色導向對應頁面
+  if (state.user && state.userRole) {
+    if (state.userRole === 'provider') {
+      navigateTo('profile');
+      return '';
+    } else if (state.userRole === 'parent') {
+      navigateTo('evaluate');
+      return '';
+    } else if (state.userRole === 'admin') {
+      navigateTo('admin-dashboard');
+      return '';
+    }
+  }
+
   return `
     <div class="max-w-7xl mx-auto space-y-8">
       <div class="bg-gradient-to-r from-yellow-300 via-amber-300 to-yellow-400 rounded-2xl shadow-xl p-8 md:p-12 text-center">
         <h2 class="text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg">歡迎來到托育人員鼓勵機制試辦計畫</h2>
         <p class="text-lg md:text-xl text-yellow-50 mb-6">提供專業的托育服務資訊與管理平台</p>
-        ${!state.user ? `
-          <button onclick="navigateTo('login')" 
-                  class="px-8 py-3 bg-white text-yellow-600 rounded-full font-bold text-lg hover:bg-yellow-50 transition shadow-lg transform hover:scale-105">
-            立即登入 →
-          </button>
-        ` : ''}
+        <button onclick="navigateTo('login')" 
+                class="px-8 py-3 bg-white text-yellow-600 rounded-full font-bold text-lg hover:bg-yellow-50 transition shadow-lg transform hover:scale-105">
+          立即登入 →
+        </button>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-xl p-8 text-center">
-        <h3 class="text-2xl font-bold text-gray-800 mb-4">系統功能</h3>
-        <div class="grid md:grid-cols-3 gap-6 mt-6">
-          <div class="p-6 border-2 border-yellow-200 rounded-xl">
-            <div class="text-4xl mb-3">👨‍🏫</div>
-            <h4 class="font-bold text-lg mb-2">托育人員</h4>
-            <p class="text-sm text-gray-600">查看個人評價統計與反饋</p>
+      <div class="grid md:grid-cols-2 gap-8">
+        <!-- 最新消息 -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden border-t-4 border-yellow-400">
+          <div class="bg-gradient-to-r from-yellow-400 to-amber-400 px-6 py-4">
+            <h3 class="text-2xl font-bold text-white">最新消息</h3>
           </div>
-          <div class="p-6 border-2 border-yellow-200 rounded-xl">
-            <div class="text-4xl mb-3">👪</div>
-            <h4 class="font-bold text-lg mb-2">家長</h4>
-            <p class="text-sm text-gray-600">評價托育人員服務品質</p>
+          <div class="p-6 space-y-4" id="news-container">
+            <p class="text-gray-500 text-center py-8">載入中...</p>
           </div>
-          <div class="p-6 border-2 border-yellow-200 rounded-xl">
-            <div class="text-4xl mb-3">👔</div>
-            <h4 class="font-bold text-lg mb-2">管理員</h4>
-            <p class="text-sm text-gray-600">查看所有評價與統計資料</p>
+        </div>
+
+        <!-- 政策宣導 -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden border-t-4 border-amber-500">
+          <div class="bg-gradient-to-r from-amber-500 to-yellow-500 px-6 py-4">
+            <h3 class="text-2xl font-bold text-white">政策宣導</h3>
+          </div>
+          <div class="p-6 space-y-4" id="policy-container">
+            <p class="text-gray-500 text-center py-8">載入中...</p>
           </div>
         </div>
       </div>
     </div>
   `;
 }
-
 // 渲染登入頁面
 function renderLoginPage() {
   return `
