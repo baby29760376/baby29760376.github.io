@@ -6,6 +6,16 @@ function renderEvaluatePage() {
     return '';
   }
 
+  // 🔥 新增：如果家長資料還在載入中
+  if (!state.parentData) {
+    return `
+      <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-12 text-center">
+        <div class="animate-spin w-16 h-16 border-4 border-yellow-400 border-t-transparent rounded-full mx-auto mb-4"></div>
+        <p class="text-gray-600">載入中...</p>
+      </div>
+    `;
+  }
+
   if (state.assignedProviders.length === 0) {
     return `
       <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-12 text-center">
@@ -17,7 +27,23 @@ function renderEvaluatePage() {
   }
 
   return `
-    <div class="max-w-5xl mx-auto">
+    <div class="max-w-5xl mx-auto space-y-6">
+      <!-- 🔥 新增：家長個人資訊卡片 -->
+      <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-400 to-indigo-400 px-8 py-6">
+          <div class="flex items-center gap-4">
+            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg">
+              <span class="text-3xl">👤</span>
+            </div>
+            <div>
+              <h2 class="text-2xl font-bold text-white">${state.parentData.name}</h2>
+              <p class="text-blue-100">${state.parentData.email}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 原有的托育人員列表 -->
       <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
         <div class="bg-gradient-to-r from-yellow-400 to-amber-400 px-8 py-6">
           <h2 class="text-3xl font-bold text-white flex items-center gap-3">
@@ -248,7 +274,7 @@ function renderEvaluationForm(providerId, evaluation) {
         </button>
         
         <p class="text-center text-sm text-red-600">
-          ⚠️提交後將無法修改，請確認所有評價項目都已正確勾選
+          ⚠️ 提交後將無法修改，請確認所有評價項目都已正確勾選
         </p>
       </div>
     </form>
@@ -259,7 +285,7 @@ function renderEvaluationSection(title, category, items, evaluation) {
   return `
     <div class="mb-8 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border-2 border-gray-200">
       <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-        <span class="text-2xl"></span>
+        <span class="text-2xl">💝</span>
         ${title}
       </h3>
       <div class="space-y-3">
@@ -283,7 +309,7 @@ function renderCommentSection(providerId) {
   return `
     <div class="mt-8 bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-6 border-2 border-orange-200">
       <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-        <span></span>
+        <span>💬</span>
         給三重居托中心管理員的文字留言（選填）
       </h3>
       <p class="text-sm text-gray-600 mb-4">
@@ -301,7 +327,7 @@ function renderSubmittedComment() {
   return `
     <div class="bg-white border-2 border-orange-300 rounded-lg p-4 mb-4">
       <div class="flex items-start gap-2 mb-2">
-        <span class="text-lg"></span>
+        <span class="text-lg">💬</span>
         <div class="flex-1">
           <p class="text-sm font-bold text-green-700 mb-2">您已提交留言給管理員：</p>
           <p class="text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded">${state.currentComment.comment}</p>
@@ -310,7 +336,7 @@ function renderSubmittedComment() {
       </div>
     </div>
     <div class="text-center py-4 bg-green-50 rounded-lg border-2 border-green-200">
-      <p class="text-green-700 font-semibold">留言已提交，無法修改</p>
+      <p class="text-green-700 font-semibold">✅ 留言已提交，無法修改</p>
       <p class="text-xs text-gray-600 mt-1">三重居托中心人員會查看您的留言並進行處理</p>
       <p class="text-xs text-green-700 mt-2">如需修改留言，請聯絡三重居托中心：<a href="tel:${CENTER_INFO.phone}" class="font-bold underline hover:text-green-900">${CENTER_INFO.phone}</a></p>
     </div>
