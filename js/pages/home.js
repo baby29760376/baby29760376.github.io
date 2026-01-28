@@ -1,8 +1,7 @@
 // 首頁渲染
 
 function renderHomePage() {
-  const latestNews = state.news.filter(n => n.category === '最新消息');
-  const policies = state.news.filter(n => n.category === '政策宣導');
+  const latestNews = state.news.slice(0, 5); // 只顯示前 5 則
   
   return `
     <div class="space-y-8">
@@ -17,43 +16,29 @@ function renderHomePage() {
         ` : ''}
       </div>
 
-      <div class="grid md:grid-cols-2 gap-8">
-        <!-- 最新消息 -->
-        <div class="bg-white rounded-2xl shadow-lg overflow-hidden border-t-4 border-yellow-400">
-          <div class="bg-gradient-to-r from-yellow-400 to-amber-400 px-6 py-4 flex items-center space-x-3">
-            <div class="text-white">${ICONS.news}</div>
-            <h3 class="text-2xl font-bold text-white">最新消息</h3>
-          </div>
-          <div class="p-6 space-y-4">
-            ${latestNews.length === 0 ? '<p class="text-gray-500 text-center py-8">目前沒有最新消息</p>' : ''}
-            ${latestNews.map(news => `
-              <div class="border-l-4 border-yellow-400 pl-4 py-2 hover:bg-yellow-50 transition rounded">
-                <h4 class="font-semibold text-gray-800 mb-1">${news.title}</h4>
-                <p class="text-sm text-gray-600 mb-2">${news.content}</p>
-                <p class="text-xs text-gray-400">${new Date(news.published_date).toLocaleDateString('zh-TW')}</p>
-              </div>
-            `).join('')}
-          </div>
+      <!-- 最新消息 -->
+      <div class="bg-white rounded-2xl shadow-lg overflow-hidden border-t-4 border-yellow-400">
+        <div class="bg-gradient-to-r from-yellow-400 to-amber-400 px-6 py-4 flex items-center space-x-3">
+          <div class="text-white">${ICONS.news}</div>
+          <h3 class="text-2xl font-bold text-white">最新消息</h3>
         </div>
-
-        <!-- 政策宣導 -->
-        <div class="bg-white rounded-2xl shadow-lg overflow-hidden border-t-4 border-amber-500">
-          <div class="bg-gradient-to-r from-amber-500 to-yellow-500 px-6 py-4 flex items-center space-x-3">
-            <div class="text-white">${ICONS.megaphone}</div>
-            <h3 class="text-2xl font-bold text-white">政策宣導</h3>
-          </div>
-          <div class="p-6 space-y-4">
-            ${policies.length === 0 ? '<p class="text-gray-500 text-center py-8">目前沒有政策宣導</p>' : ''}
-            ${policies.map(news => `
-              <div class="border-l-4 border-amber-500 pl-4 py-2 hover:bg-amber-50 transition rounded">
-                <h4 class="font-semibold text-gray-800 mb-1">${news.title}</h4>
-                <p class="text-sm text-gray-600 mb-2">${news.content}</p>
-                <p class="text-xs text-gray-400">${new Date(news.published_date).toLocaleDateString('zh-TW')}</p>
-              </div>
-            `).join('')}
-          </div>
+        <div class="p-6 space-y-4">
+          ${latestNews.length === 0 ? '<p class="text-gray-500 text-center py-8">目前沒有最新消息</p>' : ''}
+          ${latestNews.map(news => `
+            <div class="border-l-4 border-yellow-400 pl-4 py-2 hover:bg-yellow-50 transition rounded cursor-pointer"
+                 onclick="viewNewsDetail('${news.id}')">
+              <h4 class="font-semibold text-gray-800 mb-1">${news.title}</h4>
+              <p class="text-xs text-gray-400">${new Date(news.published_date).toLocaleDateString('zh-TW')}</p>
+            </div>
+          `).join('')}
         </div>
       </div>
     </div>
   `;
+}
+
+// 查看消息詳情
+function viewNewsDetail(newsId) {
+  state.selectedNewsId = newsId;
+  navigateTo('news-detail');
 }
