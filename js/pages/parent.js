@@ -60,10 +60,9 @@ function renderEvaluatePage() {
                    onclick="selectProvider(${JSON.stringify(provider).replace(/"/g, '&quot;')})">
                 <div class="flex flex-col items-center text-center">
                   <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 shadow-md">
-                    <span class="text-4xl">${provider.gender === '男' ? '👨‍🏫' : '👩‍🏫'}</span>
+                    <span class="text-4xl">👨‍🏫</span>
                   </div>
-                  <h3 class="text-xl font-bold text-gray-800 mb-1">${provider.name}</h3>
-                  <p class="text-sm text-gray-600 mb-3">${provider.gender}</p>
+                  <h3 class="text-xl font-bold text-gray-800 mb-3">${provider.name}</h3>
                   <button class="px-6 py-2 bg-gradient-to-r from-yellow-400 to-amber-400 text-white font-semibold rounded-lg hover:from-yellow-500 hover:to-amber-500 transition">
                     開始評價
                   </button>
@@ -143,7 +142,7 @@ function renderProviderHeader(provider, hasEvaluated) {
       </button>
       <div class="flex items-center gap-6">
         <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg">
-          <span class="text-5xl">${provider.gender === '男' ? '👨‍🏫' : '👩‍🏫'}</span>
+          <span class="text-5xl">👨‍🏫</span>
         </div>
         <div>
           <h2 class="text-3xl font-bold text-white mb-2">${provider.name}</h2>
