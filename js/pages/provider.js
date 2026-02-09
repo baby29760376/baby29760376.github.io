@@ -24,16 +24,17 @@ function renderProfilePage() {
       <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
         <div class="bg-gradient-to-r from-yellow-400 to-amber-400 px-8 py-12 text-center">
           <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl border-4 border-yellow-200">
-            <span class="text-6xl">${state.providerData.gender === '男' ? '👨‍🏫' : '👩‍🏫'}</span>
+            <span class="text-6xl">👨‍🏫</span>
           </div>
           <h2 class="text-4xl font-bold text-white mb-2">${state.providerData.name}</h2>
           <p class="text-yellow-100 text-lg">@${state.providerData.account}</p>
         </div>
         
-        <div class="bg-gradient-to-br from-yellow-50 to-amber-50 p-6 rounded-xl border-2 border-yellow-200">
-          <p class="text-sm font-semibold text-gray-600 mb-2">帳號</p>
-          <p class="text-2xl font-bold text-gray-800">${state.providerData.account}</p>
-        </div>
+        <div class="p-8 space-y-6">
+          <div class="bg-gradient-to-br from-yellow-50 to-amber-50 p-6 rounded-xl border-2 border-yellow-200">
+            <p class="text-sm font-semibold text-gray-600 mb-2">帳號</p>
+            <p class="text-2xl font-bold text-gray-800">${state.providerData.account}</p>
+          </div>
           
           <div class="bg-gradient-to-br from-yellow-50 to-amber-50 p-6 rounded-xl border-2 border-yellow-200">
             <p class="text-sm font-semibold text-gray-600 mb-3">個人簡介</p>
