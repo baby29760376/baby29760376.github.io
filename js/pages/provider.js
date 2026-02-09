@@ -30,18 +30,10 @@ function renderProfilePage() {
           <p class="text-yellow-100 text-lg">@${state.providerData.account}</p>
         </div>
         
-        <div class="p-8 space-y-6">
-          <div class="grid md:grid-cols-2 gap-6">
-            <div class="bg-gradient-to-br from-yellow-50 to-amber-50 p-6 rounded-xl border-2 border-yellow-200">
-              <p class="text-sm font-semibold text-gray-600 mb-2">性別</p>
-              <p class="text-2xl font-bold text-gray-800">${state.providerData.gender}</p>
-            </div>
-            
-            <div class="bg-gradient-to-br from-yellow-50 to-amber-50 p-6 rounded-xl border-2 border-yellow-200">
-              <p class="text-sm font-semibold text-gray-600 mb-2">帳號</p>
-              <p class="text-2xl font-bold text-gray-800">${state.providerData.account}</p>
-            </div>
-          </div>
+        <div class="bg-gradient-to-br from-yellow-50 to-amber-50 p-6 rounded-xl border-2 border-yellow-200">
+          <p class="text-sm font-semibold text-gray-600 mb-2">帳號</p>
+          <p class="text-2xl font-bold text-gray-800">${state.providerData.account}</p>
+        </div>
           
           <div class="bg-gradient-to-br from-yellow-50 to-amber-50 p-6 rounded-xl border-2 border-yellow-200">
             <p class="text-sm font-semibold text-gray-600 mb-3">個人簡介</p>
