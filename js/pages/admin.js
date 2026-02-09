@@ -67,11 +67,11 @@ function renderProvidersList() {
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
               <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md">
-                <span class="text-3xl">${provider.gender === '男' ? '👨‍🏫' : '👩‍🏫'}</span>
+                <span class="text-3xl">👨‍🏫</span>
               </div>
               <div>
                 <h4 class="text-xl font-bold text-gray-800">${provider.name}</h4>
-                <p class="text-sm text-gray-600">${provider.gender} · @${provider.account}</p>
+                <p class="text-sm text-gray-600">@${provider.account}</p>
               </div>
             </div>
             <div class="flex items-center gap-6">
@@ -137,11 +137,11 @@ function renderAdminProviderHeader(provider) {
       </button>
       <div class="flex items-center gap-6">
         <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg">
-          <span class="text-5xl">${provider.gender === '男' ? '👨‍🏫' : '👩‍🏫'}</span>
+          <span class="text-5xl">👨‍🏫</span>
         </div>
         <div>
           <h2 class="text-3xl font-bold text-white mb-2">${provider.name}</h2>
-          <p class="text-purple-100">${provider.gender} · @${provider.account}</p>
+          <p class="text-purple-100">@${provider.account}</p>
         </div>
       </div>
     </div>
@@ -205,7 +205,6 @@ function renderAdminProviderThemeStats(stats) {
     </div>
   `;
 }
-
 function renderAdminProviderEvaluations() {
   return `
     <div class="bg-white rounded-xl border-2 border-gray-200">
@@ -382,4 +381,4 @@ function toggleEvaluationItems(itemsId) {
   if (element) {
     element.classList.toggle('hidden');
   }
-                                                             }
+}
