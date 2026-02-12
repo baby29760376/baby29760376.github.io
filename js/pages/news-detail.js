@@ -1,4 +1,4 @@
-// 消息詳細頁面渲染
+// 消息詳細頁面渲染（支援圖片顯示）
 
 function renderNewsDetailPage() {
   const news = state.news.find(n => n.id === state.selectedNewsId);
@@ -14,6 +14,8 @@ function renderNewsDetailPage() {
       </div>
     `;
   }
+
+  const hasImage = news.image_url;
 
   return `
     <div class="max-w-4xl mx-auto">
@@ -32,6 +34,16 @@ function renderNewsDetailPage() {
             })}
           </p>
         </div>
+
+        <!-- 封面圖片 -->
+        ${hasImage ? `
+          <div class="px-8 pt-8">
+            <img src="${news.image_url}" 
+                 alt="${news.title}" 
+                 class="w-full max-h-96 object-contain rounded-xl shadow-lg"
+                 onerror="this.parentElement.style.display='none'">
+          </div>
+        ` : ''}
 
         <!-- 內容 -->
         <div class="p-8">
