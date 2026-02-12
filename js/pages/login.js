@@ -37,17 +37,6 @@ function renderLoginPage() {
               登入
             </button>
           </div>
-          
-          <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p class="text-sm text-gray-600 mb-3">
-              <strong class="text-yellow-700">測試帳號：</strong>
-            </p>
-            <div class="text-xs text-gray-600 space-y-1">
-              <p><strong>托育人員：</strong> provider1@example.com / password123</p>
-              <p><strong>家長：</strong> parent1@example.com / password123</p>
-              <p class="text-yellow-700 mt-2">💡 系統會自動判斷您的身份</p>
-            </div>
-          </div>
         </div>
       </div>
     </div>
