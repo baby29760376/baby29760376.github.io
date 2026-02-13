@@ -32,8 +32,8 @@ function renderEvaluatePage() {
       <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
         <div class="bg-gradient-to-r from-blue-400 to-indigo-400 px-8 py-6">
           <div class="flex items-center gap-4">
-            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg">
-              <span class="text-3xl">👤</span>
+            <div class="w-16 h-16 bg-white rounded-full shadow-lg overflow-hidden">
+              <img src="images/parent-avatar.png" alt="家長" class="block w-full h-full object-cover">
             </div>
             <div>
               <h2 class="text-2xl font-bold text-white">${state.parentData.name}</h2>

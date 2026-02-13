@@ -239,8 +239,8 @@ function renderEvaluationDetail(evaluation) {
     <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border-2 border-gray-200">
       <div class="flex items-center justify-between mb-4">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow">
-            <span class="text-2xl">👤</span>
+          <div class="w-12 h-12 bg-white rounded-full shadow overflow-hidden">
+            <img src="images/parent-avatar.png" alt="家長" class="block w-full h-full object-cover">
           </div>
           <div>
             <h5 class="text-lg font-bold text-gray-800">${evaluation.parent_name}</h5>
