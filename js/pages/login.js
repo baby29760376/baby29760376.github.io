@@ -8,7 +8,7 @@ function renderLoginPage() {
           <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
             <span class="text-4xl">🔐</span>
           </div>
-          <h2 class="text-3xl font-bold text-white">登入系統</h2>
+          <h2 class="text-lg md:text-3xl font-bold text-white break-words">登入系統</h2>
           <p class="text-yellow-100 mt-2">請輸入您的帳號密碼</p>
         </div>
         

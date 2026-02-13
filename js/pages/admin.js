@@ -19,7 +19,7 @@ function renderAdminDashboard() {
     <div class="max-w-6xl mx-auto">
       <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
         <div class="bg-gradient-to-r from-purple-400 via-pink-400 to-red-400 px-8 py-6">
-          <h2 class="text-3xl font-bold text-white flex items-center gap-3">
+          <h2 class="text-lg md:text-3xl font-bold text-white flex items-center gap-3 break-words">
             <span>⭐</span>
             托育人員管理總覽
           </h2>
@@ -66,8 +66,8 @@ function renderProvidersList() {
              onclick="selectProviderForAdmin(${JSON.stringify(provider).replace(/"/g, '&quot;')})">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
-              <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-md">
-                <span class="text-3xl">👨‍🏫</span>
+              <div class="w-20 h-20 bg-white rounded-full shadow-md overflow-hidden">
+                <img src="images/provider-avatar.png" alt="托育人員" class="block w-full h-full object-cover transform scale-110">
               </div>
               <div>
                 <h4 class="text-xl font-bold text-gray-800">${provider.name}</h4>
@@ -136,11 +136,11 @@ function renderAdminProviderHeader(provider) {
         ← 返回總覽
       </button>
       <div class="flex items-center gap-6">
-        <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg">
-          <span class="text-5xl">👨‍🏫</span>
+        <div class="w-28 h-28 bg-white rounded-full shadow-lg overflow-hidden">
+          <img src="images/provider-avatar.png" alt="托育人員" class="block w-full h-full object-cover transform scale-110">
         </div>
         <div>
-          <h2 class="text-3xl font-bold text-white mb-2">${provider.name}</h2>
+          <h2 class="text-lg md:text-3xl font-bold text-white mb-2 break-words">${provider.name}</h2>
           <p class="text-purple-100">@${provider.account}</p>
         </div>
       </div>

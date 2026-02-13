@@ -46,7 +46,7 @@ function renderEvaluatePage() {
       <!-- 原有的托育人員列表 -->
       <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
         <div class="bg-gradient-to-r from-yellow-400 to-amber-400 px-8 py-6">
-          <h2 class="text-3xl font-bold text-white flex items-center gap-3">
+          <h2 class="text-lg md:text-3xl font-bold text-white flex items-center gap-3 break-words">
             <span>❤️</span>
             評價托育人員
           </h2>
@@ -59,8 +59,8 @@ function renderEvaluatePage() {
               <div class="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl p-6 border-2 border-yellow-200 hover:border-yellow-400 hover:shadow-lg transition cursor-pointer"
                    onclick="selectProvider(${JSON.stringify(provider).replace(/"/g, '&quot;')})">
                 <div class="flex flex-col items-center text-center">
-                  <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 shadow-md">
-                    <span class="text-4xl">👨‍🏫</span>
+                  <div class="w-24 h-24 bg-white rounded-full mb-4 shadow-md overflow-hidden">
+                    <img src="images/provider-avatar.png" alt="托育人員" class="block w-full h-full object-cover transform scale-110">
                   </div>
                   <h3 class="text-xl font-bold text-gray-800 mb-3">${provider.name}</h3>
                   <button class="px-6 py-2 bg-gradient-to-r from-yellow-400 to-amber-400 text-white font-semibold rounded-lg hover:from-yellow-500 hover:to-amber-500 transition">
@@ -141,8 +141,8 @@ function renderProviderHeader(provider, hasEvaluated) {
         ← 返回列表
       </button>
       <div class="flex items-center gap-6">
-        <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-lg">
-          <span class="text-5xl">👨‍🏫</span>
+        <div class="w-28 h-28 bg-white rounded-full shadow-lg overflow-hidden">
+          <img src="images/provider-avatar.png" alt="托育人員" class="block w-full h-full object-cover transform scale-110">
         </div>
         <div>
           <h2 class="text-3xl font-bold text-white mb-2">${provider.name}</h2>

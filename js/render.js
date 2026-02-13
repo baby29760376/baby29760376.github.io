@@ -28,8 +28,8 @@ function renderNavigation() {
               <span class="text-2xl">👶</span>
             </div>
             <div>
-              <h1 class="text-2xl font-bold text-white drop-shadow-md">托育人員鼓勵機制試辦計畫</h1>
-              <p class="text-xs text-yellow-100">Child Care Provider Incentive Pilot Program</p>
+              <h1 class="text-lg md:text-2xl font-bold text-white drop-shadow-md break-words">托育人員鼓勵機制試辦計畫</h1>
+              <p class="text-xs text-yellow-100 hidden sm:block">Child Care Provider Incentive Pilot Program</p>
             </div>
           </div>
           

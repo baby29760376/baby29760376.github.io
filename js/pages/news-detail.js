@@ -25,7 +25,7 @@ function renderNewsDetailPage() {
           <button onclick="navigateTo('home')" class="text-white hover:text-yellow-100 mb-4 flex items-center gap-2">
             ← 返回首頁
           </button>
-          <h1 class="text-3xl font-bold text-white mb-2">${news.title}</h1>
+          <h1 class="text-lg md:text-3xl font-bold text-white mb-2 break-words">${news.title}</h1>
           <p class="text-yellow-100">
             📅 ${new Date(news.published_date).toLocaleDateString('zh-TW', { 
               year: 'numeric', 
