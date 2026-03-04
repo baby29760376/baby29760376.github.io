@@ -1,6 +1,8 @@
 // 首次登入改密碼頁面
 
 function renderChangePasswordPage() {
+  const isRecovery = state.user && state.user.isRecovery;
+
   return `
     <div class="max-w-md mx-auto">
       <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
@@ -8,15 +10,19 @@ function renderChangePasswordPage() {
           <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
             <span class="text-4xl">🔑</span>
           </div>
-          <h2 class="text-2xl font-bold text-white">請設定您的新密碼</h2>
-          <p class="text-yellow-100 mt-2">首次登入需變更密碼才能使用系統</p>
+          <h2 class="text-2xl font-bold text-white">
+            ${isRecovery ? '重置您的密碼' : '請設定您的新密碼'}
+          </h2>
+          <p class="text-yellow-100 mt-2">
+            ${isRecovery ? '請輸入您的新密碼' : '首次登入需變更密碼才能使用系統'}
+          </p>
         </div>
 
         <div class="p-8">
           <div class="mb-6 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-lg">
             <p class="text-yellow-800 text-sm flex items-start gap-2">
               <span class="text-lg">⚠️</span>
-              <span>為了保護您的帳號安全，請設定一個新密碼。密碼設定後即可正常使用系統。</span>
+              <span>${isRecovery ? '請設定一個新密碼，設定完成後將返回登入頁面。' : '為了保護您的帳號安全，請設定一個新密碼。密碼設定後即可正常使用系統。'}</span>
             </p>
           </div>
 
@@ -88,6 +94,8 @@ async function handleChangePassword() {
 
   state.error = '';
 
+  const isRecovery = state.user && state.user.isRecovery;
+
   try {
     // 1. 呼叫 Supabase Auth 更新密碼
     const updateResponse = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
@@ -103,43 +111,55 @@ async function handleChangePassword() {
     if (!updateResponse.ok) {
       const err = await updateResponse.json();
       console.error('密碼更新失敗:', err);
-      state.error = '密碼更新失敗，請稍後再試';
+      state.error = '密碼更新失敗，連結可能已過期，請重新申請重置密碼';
       render();
       return;
     }
 
-    // 2. 更新資料表的 password_changed = true
-    const table = state.userRole === 'provider' ? 'child_care_providers' : 'parents';
-    const markResponse = await fetch(
-      `${SUPABASE_URL}/rest/v1/${table}?user_id=eq.${state.user.id}`,
-      {
-        method: 'PATCH',
-        headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${state.user.token}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify({ password_changed: true })
-      }
-    );
+    // 2. 若是首次登入（非 recovery），才需要標記 password_changed
+    if (!isRecovery) {
+      const table = state.userRole === 'provider' ? 'child_care_providers' : 'parents';
+      const markResponse = await fetch(
+        `${SUPABASE_URL}/rest/v1/${table}?user_id=eq.${state.user.id}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${state.user.token}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({ password_changed: true })
+        }
+      );
 
-    if (!markResponse.ok) {
-      console.error('標記 password_changed 失敗');
+      if (!markResponse.ok) {
+        console.error('標記 password_changed 失敗');
+      }
     }
 
-    // 3. 更新 state 並導向正確頁面
-    state.user.password_changed = true;
-    sessionStorage.setItem('childcare_user', JSON.stringify(state.user));
+    // 3. 導向對應頁面
+    if (isRecovery) {
+      // 從忘記密碼信件來的 → 重設完直接回登入頁
+      alert('✅ 密碼重置成功！請用新密碼重新登入。');
+      resetState();
+      sessionStorage.removeItem('childcare_user');
+      // 清除網址的 hash，避免重新整理又進入 recovery 流程
+      history.replaceState(null, '', window.location.pathname);
+      navigateTo('login');
+    } else {
+      // 首次登入 → 正常進入系統
+      alert('✅ 密碼設定成功！歡迎使用系統。');
+      state.user.password_changed = true;
+      sessionStorage.setItem('childcare_user', JSON.stringify(state.user));
 
-    alert('✅ 密碼設定成功！歡迎使用系統。');
-
-    if (state.userRole === 'provider') {
-      state.currentPage = 'profile';
-      await fetchProviderData();
-    } else if (state.userRole === 'parent') {
-      state.currentPage = 'evaluate';
-      await fetchParentData();
+      if (state.userRole === 'provider') {
+        state.currentPage = 'profile';
+        await fetchProviderData();
+      } else if (state.userRole === 'parent') {
+        state.currentPage = 'evaluate';
+        await fetchParentData();
+      }
     }
 
   } catch (error) {
