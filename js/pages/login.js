@@ -23,13 +23,21 @@ function renderLoginPage() {
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">電子郵件</label>
               <input type="email" id="email" placeholder="請輸入電子郵件"
-                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-yellow-400 focus:outline-none transition">
+                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-yellow-400 focus:outline-none transition"
+                     onkeydown="if(event.key==='Enter') document.getElementById('password').focus()">
             </div>
             
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">密碼</label>
-              <input type="password" id="password" placeholder="請輸入密碼"
-                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-yellow-400 focus:outline-none transition">
+              <div class="relative">
+                <input type="password" id="password" placeholder="請輸入密碼"
+                       class="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-lg focus:border-yellow-400 focus:outline-none transition"
+                       onkeydown="if(event.key==='Enter') handleLogin(document.getElementById('email').value, document.getElementById('password').value)">
+                <button type="button" onclick="togglePasswordVisibility('password', 'eyeIcon-login')"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition p-1">
+                  ${EYE_ICONS.closed}
+                </button>
+              </div>
             </div>
             
             <button onclick="handleLogin(document.getElementById('email').value, document.getElementById('password').value)"
