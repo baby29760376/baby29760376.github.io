@@ -1,6 +1,12 @@
 // 主渲染函數
 
 function navigateTo(page) {
+  // 若尚未改密碼，禁止跳離改密碼頁
+  if (state.user && state.user.password_changed === false && page !== 'change-password') {
+    state.currentPage = 'change-password';
+    render();
+    return;
+  }
   state.currentPage = page;
   state.error = '';
   state.selectedProvider = null;
@@ -10,7 +16,7 @@ function navigateTo(page) {
 
 function render() {
   const app = document.getElementById('app');
-  
+
   app.innerHTML = `
     ${renderNavigation()}
     ${renderMainContent()}
@@ -32,7 +38,7 @@ function renderNavigation() {
               <p class="text-xs text-yellow-100 hidden sm:block">Child Care Provider Incentive Pilot Program</p>
             </div>
           </div>
-          
+
           ${renderNavigationButtons()}
         </div>
       </div>
@@ -41,6 +47,19 @@ function renderNavigation() {
 }
 
 function renderNavigationButtons() {
+  // 改密碼頁面：只顯示登出，禁止其他導航
+  if (state.user && state.user.password_changed === false) {
+    return `
+      <div class="flex items-center space-x-4">
+        <span class="text-yellow-100 text-sm hidden sm:inline">請先設定新密碼</span>
+        <button onclick="handleLogout()" class="flex items-center space-x-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition">
+          ${ICONS.logout}
+          <span class="hidden sm:inline">登出</span>
+        </button>
+      </div>
+    `;
+  }
+
   if (!state.user) {
     return `
       <div class="flex items-center space-x-4">
@@ -109,6 +128,8 @@ function getPageContent() {
       return renderHomePage();
     case 'login':
       return renderLoginPage();
+    case 'change-password':
+      return renderChangePasswordPage();
     case 'profile':
       return renderProfilePage();
     case 'evaluate':
