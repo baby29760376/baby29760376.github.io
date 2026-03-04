@@ -18,6 +18,7 @@ function init() {
         isRecovery: true
       };
       state.currentPage = 'change-password';
+      fetchNews();
       render();
       return;
     }
@@ -28,6 +29,7 @@ function init() {
   render();
 }
 
+// 當 DOM 載入完成後執行初始化
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {
