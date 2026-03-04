@@ -33,9 +33,17 @@ function renderLoginPage() {
                 <input type="password" id="password" placeholder="請輸入密碼"
                        class="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-lg focus:border-yellow-400 focus:outline-none transition"
                        onkeydown="if(event.key==='Enter') handleLogin(document.getElementById('email').value, document.getElementById('password').value)">
-                <button type="button" onclick="togglePasswordVisibility('password', 'eyeIcon-login')"
+                <button type="button" onclick="togglePasswordVisibility('password')"
                         class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition p-1">
                   ${EYE_ICONS.closed}
+                </button>
+              </div>
+
+              <!-- 忘記密碼連結 -->
+              <div class="text-right mt-2">
+                <button onclick="navigateTo('forgot-password')"
+                        class="text-sm text-yellow-600 hover:text-yellow-800 hover:underline transition">
+                  忘記密碼／首次登入？
                 </button>
               </div>
             </div>
