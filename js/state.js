@@ -18,9 +18,10 @@ const state = {
   selectedProvider: null,
   evaluationStats: null,
   news: [],
-  selectedNewsId: null, // 🔥 新增這一行
+  selectedNewsId: null,
   currentPage: 'home',
-  error: ''
+  error: '',
+  forgotPasswordSuccess: false
 };
 
 // 狀態操作函數
@@ -44,7 +45,8 @@ function resetState() {
   state.currentComment = null;
   state.selectedProvider = null;
   state.evaluationStats = null;
-  state.selectedNewsId = null; // 🔥 新增這一行
+  state.selectedNewsId = null;
   state.currentPage = 'home';
   state.error = '';
+  state.forgotPasswordSuccess = false;
 }
