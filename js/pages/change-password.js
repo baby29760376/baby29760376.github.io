@@ -29,15 +29,35 @@ function renderChangePasswordPage() {
           <div class="space-y-5">
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">新密碼</label>
-              <input type="password" id="newPassword" placeholder="請輸入新密碼（至少8個字元）"
-                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-yellow-400 focus:outline-none transition">
+              <div class="relative">
+                <input type="password" id="newPassword" placeholder="請輸入新密碼（至少8個字元）"
+                       class="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-lg focus:border-yellow-400 focus:outline-none transition">
+                <button type="button" onclick="togglePasswordVisibility('newPassword', 'eyeIcon1')"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition">
+                  <svg id="eyeIcon1" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
             </div>
 
             <div>
               <label class="block text-sm font-semibold text-gray-700 mb-2">確認新密碼</label>
-              <input type="password" id="confirmPassword" placeholder="請再次輸入新密碼"
-                     class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-yellow-400 focus:outline-none transition"
-                     onkeydown="if(event.key==='Enter') handleChangePassword()">
+              <div class="relative">
+                <input type="password" id="confirmPassword" placeholder="請再次輸入新密碼"
+                       class="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-lg focus:border-yellow-400 focus:outline-none transition"
+                       onkeydown="if(event.key==='Enter') handleChangePassword()">
+                <button type="button" onclick="togglePasswordVisibility('confirmPassword', 'eyeIcon2')"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition">
+                  <svg id="eyeIcon2" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                       fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                </button>
+              </div>
             </div>
 
             <button onclick="handleChangePassword()"
@@ -51,11 +71,24 @@ function renderChangePasswordPage() {
   `;
 }
 
+// 切換顯示/隱藏密碼
+function togglePasswordVisibility(inputId, iconId) {
+  const input = document.getElementById(inputId);
+  const icon = document.getElementById(iconId);
+  const isHidden = input.type === 'password';
+
+  input.type = isHidden ? 'text' : 'password';
+
+  // 顯示中 → 眼睛加斜線；隱藏中 → 一般眼睛
+  icon.innerHTML = isHidden
+    ? `<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>`
+    : `<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>`;
+}
+
 async function handleChangePassword() {
   const newPassword = document.getElementById('newPassword').value;
   const confirmPassword = document.getElementById('confirmPassword').value;
 
-  // 驗證
   if (!newPassword || !confirmPassword) {
     state.error = '請填寫所有欄位';
     render();
@@ -114,7 +147,6 @@ async function handleChangePassword() {
 
     if (!markResponse.ok) {
       console.error('標記 password_changed 失敗');
-      // 非致命錯誤，密碼已改成功，繼續流程
     }
 
     // 3. 更新 state 並導向正確頁面
