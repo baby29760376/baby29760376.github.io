@@ -9,6 +9,7 @@ function navigateTo(page) {
   }
   state.currentPage = page;
   state.error = '';
+  state.forgotPasswordSuccess = false;
   state.selectedProvider = null;
   state.currentEvaluation = null;
   render();
