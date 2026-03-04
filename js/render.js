@@ -129,6 +129,8 @@ function getPageContent() {
       return renderHomePage();
     case 'login':
       return renderLoginPage();
+    case 'forgot-password':
+      return renderForgotPasswordPage();
     case 'change-password':
       return renderChangePasswordPage();
     case 'profile':
