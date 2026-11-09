@@ -143,7 +143,7 @@ async function handleChangePassword() {
       // 從忘記密碼信件來的 → 重設完直接回登入頁
       alert('✅ 密碼重置成功！請用新密碼重新登入。');
       resetState();
-      sessionStorage.removeItem('childcare_user');
+      clearSession();
       // 清除網址的 hash，避免重新整理又進入 recovery 流程
       history.replaceState(null, '', window.location.pathname);
       navigateTo('login');
@@ -151,7 +151,6 @@ async function handleChangePassword() {
       // 首次登入 → 正常進入系統
       alert('✅ 密碼設定成功！歡迎使用系統。');
       state.user.password_changed = true;
-      sessionStorage.setItem('childcare_user', JSON.stringify(state.user));
 
       if (state.userRole === 'provider') {
         state.currentPage = 'profile';
