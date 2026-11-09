@@ -4,7 +4,6 @@
 // sessionStorage 只保存 access token。使用者 id、角色與是否已改密碼
 // 每次載入頁面都向伺服器重新查詢，不在瀏覽器端保存。
 const SESSION_TOKEN_KEY = 'childcare_token';
-const LEGACY_SESSION_KEY = 'childcare_user';
 
 function saveSessionToken(token) {
   try {
@@ -25,7 +24,6 @@ function readSessionToken() {
 function clearSession() {
   try {
     sessionStorage.removeItem(SESSION_TOKEN_KEY);
-    sessionStorage.removeItem(LEGACY_SESSION_KEY);
   } catch (error) {
     // 無法存取 sessionStorage 時不需處理
   }
@@ -72,13 +70,6 @@ async function enterApp(defaultPages) {
 
 // 重新載入頁面時，用保存的 token 還原登入狀態
 async function checkUser() {
-  // 移除舊版保存的完整使用者物件
-  try {
-    sessionStorage.removeItem(LEGACY_SESSION_KEY);
-  } catch (error) {
-    // 無法存取 sessionStorage 時不需處理
-  }
-
   const token = readSessionToken();
   if (!token) return;
 
