@@ -1,6 +1,13 @@
 // Supabase 設定
-const SUPABASE_URL = 'https://utszytwaabadivssondj.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0c3p5dHdhYWJhZGl2c3NvbmRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzMzQ1MDIsImV4cCI6MjA3NzkxMDUwMn0.Tq2RlCaOegGV7I8jYqgFLHOLpm-bic1RTuIpRzuwqaY';
+// 在 localhost / 127.0.0.1 開啟時連本機 Supabase（npx supabase start），
+// anon key 為 Supabase CLI 內建的公開 demo key，僅適用本機。
+const IS_LOCAL_DEV = ['localhost', '127.0.0.1'].includes(location.hostname);
+const SUPABASE_URL = IS_LOCAL_DEV
+  ? 'http://127.0.0.1:54321'
+  : 'https://utszytwaabadivssondj.supabase.co';
+const SUPABASE_ANON_KEY = IS_LOCAL_DEV
+  ? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'
+  : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0c3p5dHdhYWJhZGl2c3NvbmRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzMzQ1MDIsImV4cCI6MjA3NzkxMDUwMn0.Tq2RlCaOegGV7I8jYqgFLHOLpm-bic1RTuIpRzuwqaY';
 
 // ── 評價項目定義 ─────────────────────────────────────────────────
 const EVALUATION_ITEMS = {
