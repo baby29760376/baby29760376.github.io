@@ -1,6 +1,7 @@
 // Supabase 設定
-const SUPABASE_URL = 'https://utszytwaabadivssondj.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0c3p5dHdhYWJhZGl2c3NvbmRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzMzQ1MDIsImV4cCI6MjA3NzkxMDUwMn0.Tq2RlCaOegGV7I8jYqgFLHOLpm-bic1RTuIpRzuwqaY';
+// 預設連正式環境；若存在 js/config.local.js（不進版控）則改用其中設定，見 config.local.example.js
+const SUPABASE_URL = window.SUPABASE_OVERRIDE?.url ?? 'https://utszytwaabadivssondj.supabase.co';
+const SUPABASE_ANON_KEY = window.SUPABASE_OVERRIDE?.anonKey ?? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0c3p5dHdhYWJhZGl2c3NvbmRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzMzQ1MDIsImV4cCI6MjA3NzkxMDUwMn0.Tq2RlCaOegGV7I8jYqgFLHOLpm-bic1RTuIpRzuwqaY';
 
 // ── 評價項目定義 ─────────────────────────────────────────────────
 const EVALUATION_ITEMS = {
