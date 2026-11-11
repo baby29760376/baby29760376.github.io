@@ -57,7 +57,8 @@ async function fetchEvaluationStats() {
   if (!state.providerData) return;
   
   try {
-    const response = await fetchAPI(`/rest/v1/provider_evaluation_stats?provider_id=eq.${state.providerData.id}&select=*`);
+    // 統計改由 RPC 提供：後端只回傳托育人員自己的資料
+    const response = await fetchAPI(`/rest/v1/rpc/get_provider_stats?provider_id=eq.${state.providerData.id}&select=*`);
     if (response.ok) {
       const data = await response.json();
       state.evaluationStats = data[0] || null;
@@ -297,7 +298,8 @@ async function fetchAllProvidersWithStats() {
     
     const providers = await providersRes.json();
     
-    const statsRes = await fetchAPI('/rest/v1/provider_evaluation_stats?select=*');
+    // 統計改由 RPC 提供：管理員可取得所有托育人員的統計
+    const statsRes = await fetchAPI('/rest/v1/rpc/get_provider_stats?select=*');
     
     let stats = [];
     if (statsRes.ok) {
