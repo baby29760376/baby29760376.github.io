@@ -37,19 +37,19 @@ function renderProfilePage() {
           <div class="w-40 h-40 bg-white rounded-full mx-auto mb-6 shadow-2xl border-2 border-yellow-200 overflow-hidden">
             <img src="images/provider-avatar.png" alt="托育人員" class="block w-full h-full object-cover transform scale-110">
           </div>
-          <h2 class="text-4xl font-bold text-white mb-2">${state.providerData.name}</h2>
-          <p class="text-yellow-100 text-lg">@${state.providerData.account}</p>
+          <h2 class="text-4xl font-bold text-white mb-2">${escapeHtml(state.providerData.name)}</h2>
+          <p class="text-yellow-100 text-lg">@${escapeHtml(state.providerData.account)}</p>
         </div>
         
         <div class="p-8 space-y-6">
           <div class="bg-gradient-to-br from-yellow-50 to-amber-50 p-6 rounded-xl border-2 border-yellow-200">
             <p class="text-sm font-semibold text-gray-600 mb-2">帳號</p>
-            <p class="text-2xl font-bold text-gray-800">${state.providerData.account}</p>
+            <p class="text-2xl font-bold text-gray-800">${escapeHtml(state.providerData.account)}</p>
           </div>
           
           <div class="bg-gradient-to-br from-yellow-50 to-amber-50 p-6 rounded-xl border-2 border-yellow-200">
             <p class="text-sm font-semibold text-gray-600 mb-3">個人簡介</p>
-            <p class="text-gray-700 leading-relaxed text-lg">${state.providerData.introduction}</p>
+            <p class="text-gray-700 leading-relaxed text-lg">${escapeHtml(state.providerData.introduction)}</p>
           </div>
         </div>
       </div>
@@ -82,13 +82,13 @@ function renderProviderStats(stats, hasEvaluations) {
           <div class="grid md:grid-cols-2 gap-6">
             <div class="bg-gradient-to-br from-red-50 to-pink-50 p-6 rounded-xl border-2 border-red-200 text-center">
               <p class="text-sm font-semibold text-gray-600 mb-2">總愛心數</p>
-              <p class="text-5xl font-bold text-red-500">${stats.total_hearts || 0}</p>
+              <p class="text-5xl font-bold text-red-500">${escapeHtml(stats.total_hearts || 0)}</p>
               <p class="text-xs text-gray-500 mt-2">💝 共獲得的肯定</p>
             </div>
             
             <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border-2 border-blue-200 text-center">
               <p class="text-sm font-semibold text-gray-600 mb-2">評價人數</p>
-              <p class="text-5xl font-bold text-blue-500">${stats.total_parents || 0}</p>
+              <p class="text-5xl font-bold text-blue-500">${escapeHtml(stats.total_parents || 0)}</p>
               <p class="text-xs text-gray-500 mt-2">👥 位家長給予評價</p>
             </div>
           </div>
@@ -103,7 +103,7 @@ function renderProviderStats(stats, hasEvaluations) {
               <div class="bg-white p-4 rounded-lg border-2 border-purple-200">
                 <div class="flex justify-between items-center">
                   <span class="font-semibold text-gray-700">一、保親溝通</span>
-                  <span class="text-2xl font-bold text-purple-500">${stats.communication_hearts || 0}</span>
+                  <span class="text-2xl font-bold text-purple-500">${escapeHtml(stats.communication_hearts || 0)}</span>
                 </div>
                 <div class="mt-2 bg-purple-100 rounded-full h-2">
                   <div class="bg-purple-500 h-2 rounded-full" style="width: ${(stats.communication_hearts || 0) / (stats.total_parents * 5) * 100}%"></div>
@@ -113,7 +113,7 @@ function renderProviderStats(stats, hasEvaluations) {
               <div class="bg-white p-4 rounded-lg border-2 border-green-200">
                 <div class="flex justify-between items-center">
                   <span class="font-semibold text-gray-700">二、托育活動安排</span>
-                  <span class="text-2xl font-bold text-green-500">${stats.activity_hearts || 0}</span>
+                  <span class="text-2xl font-bold text-green-500">${escapeHtml(stats.activity_hearts || 0)}</span>
                 </div>
                 <div class="mt-2 bg-green-100 rounded-full h-2">
                   <div class="bg-green-500 h-2 rounded-full" style="width: ${(stats.activity_hearts || 0) / (stats.total_parents * 5) * 100}%"></div>
@@ -123,7 +123,7 @@ function renderProviderStats(stats, hasEvaluations) {
               <div class="bg-white p-4 rounded-lg border-2 border-blue-200">
                 <div class="flex justify-between items-center">
                   <span class="font-semibold text-gray-700">三、作息安排與生活習慣</span>
-                  <span class="text-2xl font-bold text-blue-500">${stats.routine_hearts || 0}</span>
+                  <span class="text-2xl font-bold text-blue-500">${escapeHtml(stats.routine_hearts || 0)}</span>
                 </div>
                 <div class="mt-2 bg-blue-100 rounded-full h-2">
                   <div class="bg-blue-500 h-2 rounded-full" style="width: ${(stats.routine_hearts || 0) / (stats.total_parents * 5) * 100}%"></div>
@@ -133,7 +133,7 @@ function renderProviderStats(stats, hasEvaluations) {
               <div class="bg-white p-4 rounded-lg border-2 border-pink-200">
                 <div class="flex justify-between items-center">
                   <span class="font-semibold text-gray-700">四、保親關係</span>
-                  <span class="text-2xl font-bold text-pink-500">${stats.relationship_hearts || 0}</span>
+                  <span class="text-2xl font-bold text-pink-500">${escapeHtml(stats.relationship_hearts || 0)}</span>
                 </div>
                 <div class="mt-2 bg-pink-100 rounded-full h-2">
                   <div class="bg-pink-500 h-2 rounded-full" style="width: ${(stats.relationship_hearts || 0) / (stats.total_parents * 5) * 100}%"></div>

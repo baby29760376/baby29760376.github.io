@@ -63,28 +63,28 @@ function renderProvidersList() {
       <h3 class="text-xl font-bold text-gray-800 mb-4">托育人員列表</h3>
       ${state.allProviders.map(provider => `
         <div class="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-6 border-2 border-yellow-200 hover:border-yellow-400 hover:shadow-lg transition cursor-pointer"
-             onclick="selectProviderForAdmin(${JSON.stringify(provider).replace(/"/g, '&quot;')})">
+             onclick="selectProviderForAdmin('${safeId(provider.id)}')">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
               <div class="w-20 h-20 bg-white rounded-full shadow-md overflow-hidden">
                 <img src="images/provider-avatar.png" alt="托育人員" class="block w-full h-full object-cover transform scale-110">
               </div>
               <div>
-                <h4 class="text-xl font-bold text-gray-800">${provider.name}</h4>
-                <p class="text-sm text-gray-600">@${provider.account}</p>
+                <h4 class="text-xl font-bold text-gray-800">${escapeHtml(provider.name)}</h4>
+                <p class="text-sm text-gray-600">@${escapeHtml(provider.account)}</p>
               </div>
             </div>
             <div class="flex items-center gap-6">
               <div class="text-center">
-                <p class="text-3xl font-bold text-red-500">${provider.stats.total_hearts || 0}</p>
+                <p class="text-3xl font-bold text-red-500">${escapeHtml(provider.stats.total_hearts || 0)}</p>
                 <p class="text-xs text-gray-500">總愛心</p>
               </div>
               <div class="text-center">
-                <p class="text-3xl font-bold text-blue-500">${provider.stats.total_parents || 0}</p>
+                <p class="text-3xl font-bold text-blue-500">${escapeHtml(provider.stats.total_parents || 0)}</p>
                 <p class="text-xs text-gray-500">評價人數</p>
               </div>
               <div class="text-center">
-                <p class="text-3xl font-bold text-orange-500" id="comment-count-${provider.id}">-</p>
+                <p class="text-3xl font-bold text-orange-500" id="comment-count-${escapeHtml(provider.id)}">-</p>
                 <p class="text-xs text-gray-500">留言</p>
               </div>
               <button class="px-6 py-2 bg-gradient-to-r from-yellow-400 to-amber-400 text-white font-semibold rounded-lg hover:from-yellow-500 hover:to-amber-500 transition">
@@ -98,7 +98,10 @@ function renderProvidersList() {
   `;
 }
 
-async function selectProviderForAdmin(provider) {
+// 只接收經 safeId() 驗證的 ID，再從 state 取回完整資料（不把整個物件序列化進 onclick）
+async function selectProviderForAdmin(providerId) {
+  const provider = state.allProviders.find(p => String(p.id) === providerId);
+  if (!provider) return;
   state.selectedProviderForAdmin = provider;
   await fetchProviderDetailForAdmin(provider.id);
   state.currentPage = 'admin-provider-detail';
@@ -140,8 +143,8 @@ function renderAdminProviderHeader(provider) {
           <img src="images/provider-avatar.png" alt="托育人員" class="block w-full h-full object-cover transform scale-110">
         </div>
         <div>
-          <h2 class="text-lg md:text-3xl font-bold text-white mb-2 break-words">${provider.name}</h2>
-          <p class="text-purple-100">@${provider.account}</p>
+          <h2 class="text-lg md:text-3xl font-bold text-white mb-2 break-words">${escapeHtml(provider.name)}</h2>
+          <p class="text-purple-100">@${escapeHtml(provider.account)}</p>
         </div>
       </div>
     </div>
@@ -153,13 +156,13 @@ function renderAdminProviderOverview(stats) {
     <div class="grid md:grid-cols-2 gap-6">
       <div class="bg-gradient-to-br from-red-50 to-pink-50 p-6 rounded-xl border-2 border-red-200 text-center">
         <p class="text-sm font-semibold text-gray-600 mb-2">總愛心數</p>
-        <p class="text-5xl font-bold text-red-500">${stats.total_hearts || 0}</p>
+        <p class="text-5xl font-bold text-red-500">${escapeHtml(stats.total_hearts || 0)}</p>
         <p class="text-xs text-gray-500 mt-2">💝 共獲得的肯定</p>
       </div>
       
       <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-xl border-2 border-blue-200 text-center">
         <p class="text-sm font-semibold text-gray-600 mb-2">評價人數</p>
-        <p class="text-5xl font-bold text-blue-500">${stats.total_parents || 0}</p>
+        <p class="text-5xl font-bold text-blue-500">${escapeHtml(stats.total_parents || 0)}</p>
         <p class="text-xs text-gray-500 mt-2">👥 位家長給予評價</p>
       </div>
     </div>
@@ -177,28 +180,28 @@ function renderAdminProviderThemeStats(stats) {
         <div class="bg-white p-4 rounded-lg border-2 border-purple-200">
           <div class="flex justify-between items-center">
             <span class="font-semibold text-gray-700">一、保親溝通</span>
-            <span class="text-2xl font-bold text-purple-500">${stats.communication_hearts || 0}</span>
+            <span class="text-2xl font-bold text-purple-500">${escapeHtml(stats.communication_hearts || 0)}</span>
           </div>
         </div>
 
         <div class="bg-white p-4 rounded-lg border-2 border-green-200">
           <div class="flex justify-between items-center">
             <span class="font-semibold text-gray-700">二、托育活動安排</span>
-            <span class="text-2xl font-bold text-green-500">${stats.activity_hearts || 0}</span>
+            <span class="text-2xl font-bold text-green-500">${escapeHtml(stats.activity_hearts || 0)}</span>
           </div>
         </div>
 
         <div class="bg-white p-4 rounded-lg border-2 border-blue-200">
           <div class="flex justify-between items-center">
             <span class="font-semibold text-gray-700">三、作息安排與生活習慣</span>
-            <span class="text-2xl font-bold text-blue-500">${stats.routine_hearts || 0}</span>
+            <span class="text-2xl font-bold text-blue-500">${escapeHtml(stats.routine_hearts || 0)}</span>
           </div>
         </div>
 
         <div class="bg-white p-4 rounded-lg border-2 border-pink-200">
           <div class="flex justify-between items-center">
             <span class="font-semibold text-gray-700">四、保親關係</span>
-            <span class="text-2xl font-bold text-pink-500">${stats.relationship_hearts || 0}</span>
+            <span class="text-2xl font-bold text-pink-500">${escapeHtml(stats.relationship_hearts || 0)}</span>
           </div>
         </div>
       </div>
@@ -243,13 +246,13 @@ function renderEvaluationDetail(evaluation) {
             <img src="images/parent-avatar.png" alt="家長" class="block w-full h-full object-cover">
           </div>
           <div>
-            <h5 class="text-lg font-bold text-gray-800">${evaluation.parent_name}</h5>
+            <h5 class="text-lg font-bold text-gray-800">${escapeHtml(evaluation.parent_name)}</h5>
             <p class="text-xs text-gray-500">評價時間：${new Date(evaluation.updated_at).toLocaleDateString('zh-TW')}</p>
           </div>
         </div>
         <div class="flex items-center gap-3">
           ${hasComment ? `
-            <button onclick="toggleComment('comment-${evaluation.id || evaluation.comment_id}')" 
+            <button onclick="toggleComment('comment-${safeId(evaluation.id || evaluation.comment_id)}')" 
                     class="px-4 py-2 bg-orange-400 text-white rounded-lg hover:bg-orange-500 transition flex items-center gap-2">
               💬 查看留言
             </button>
@@ -262,12 +265,12 @@ function renderEvaluationDetail(evaluation) {
       </div>
       
       ${hasComment ? `
-        <div id="comment-${evaluation.id || evaluation.comment_id}" class="hidden mt-4 p-4 bg-orange-50 border-2 border-orange-200 rounded-lg">
+        <div id="comment-${safeId(evaluation.id || evaluation.comment_id)}" class="hidden mt-4 p-4 bg-orange-50 border-2 border-orange-200 rounded-lg">
           <div class="flex items-start gap-2 mb-2">
             <span class="text-lg">💬</span>
             <div class="flex-1">
               <p class="text-sm font-bold text-orange-800 mb-1">家長留言：</p>
-              <p class="text-gray-700 whitespace-pre-wrap">${evaluation.comment}</p>
+              <p class="text-gray-700 whitespace-pre-wrap">${escapeHtml(evaluation.comment)}</p>
             </div>
           </div>
         </div>
@@ -305,12 +308,12 @@ function renderEvaluationDetailItems(evaluation, hearts) {
     
     <!-- 顯示詳細評價項目 -->
     <div class="mt-4 bg-white p-4 rounded-lg border border-gray-200">
-      <button onclick="toggleEvaluationItems('items-${evaluation.id || evaluation.comment_id}')" 
+      <button onclick="toggleEvaluationItems('items-${safeId(evaluation.id || evaluation.comment_id)}')" 
               class="w-full text-left font-semibold text-gray-700 hover:text-gray-900 flex items-center justify-between">
         <span>📋 查看詳細評價項目</span>
         <span>▼</span>
       </button>
-      <div id="items-${evaluation.id || evaluation.comment_id}" class="hidden mt-4 space-y-4">
+      <div id="items-${safeId(evaluation.id || evaluation.comment_id)}" class="hidden mt-4 space-y-4">
         ${renderDetailedEvaluationItems(evaluation)}
       </div>
     </div>
