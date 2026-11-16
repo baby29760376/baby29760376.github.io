@@ -1,4 +1,4 @@
-// 複製為 js/config.local.js 即連本機 Supabase（npx supabase start）；刪除或改名即連回正式環境。
+// 複製為 js/config.local.js 即連本機 Supabase（npx supabase start）；刪除或改名即改用 js/config.js 的設定。
 // 此 key 為 Supabase CLI 公開的本機 demo key。
 window.SUPABASE_OVERRIDE = {
   url: 'http://127.0.0.1:54321',

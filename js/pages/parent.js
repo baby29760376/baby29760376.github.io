@@ -175,7 +175,7 @@ function renderEvaluatedBanner() {
         您已提交評價，評價內容已鎖定無法修改
       </p>
       <p class="text-green-700 text-sm mt-2">
-        如需修改評價，請撥打三重居托中心電話：<a href="tel:${CENTER_INFO.phone}" class="font-bold underline hover:text-green-900">${CENTER_INFO.phone}</a>
+        如需修改評價，請撥打${escapeHtml(CENTER_INFO.shortName)}電話：<a href="tel:${escapeHtml(CENTER_INFO.phone)}" class="font-bold underline hover:text-green-900">${escapeHtml(CENTER_INFO.phone)}</a>
       </p>
     </div>
   `;
@@ -189,7 +189,7 @@ function renderNotEvaluatedBanner() {
         <strong>請注意：評價只能提交一次，提交後將無法修改，請謹慎填寫。</strong>
       </p>
       <p class="text-yellow-700 text-sm mt-2">
-        如需修改評價，請撥打三重居托中心電話：<a href="tel:${CENTER_INFO.phone}" class="font-bold underline hover:text-yellow-900">${CENTER_INFO.phone}</a>
+        如需修改評價，請撥打${escapeHtml(CENTER_INFO.shortName)}電話：<a href="tel:${escapeHtml(CENTER_INFO.phone)}" class="font-bold underline hover:text-yellow-900">${escapeHtml(CENTER_INFO.phone)}</a>
       </p>
     </div>
   `;
@@ -246,7 +246,7 @@ function renderEvaluationReadOnly(evaluation) {
       <div class="text-6xl mb-4">✅</div>
       <p class="text-xl font-bold text-green-700 mb-2">評價已提交</p>
       <p class="text-gray-600">您的評價內容已鎖定，無法修改</p>
-      <p class="text-sm text-green-700 mt-3">如需修改評價，請聯絡三重居托中心</p>
+      <p class="text-sm text-green-700 mt-3">如需修改評價，請聯絡${escapeHtml(CENTER_INFO.shortName)}</p>
     </div>
   `;
 }
@@ -323,11 +323,11 @@ function renderCommentSection(providerId) {
     <div class="mt-8 bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-6 border-2 border-orange-200">
       <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
         <span>💬</span>
-        給三重居托中心管理員的文字留言（選填）
+        給${escapeHtml(CENTER_INFO.shortName)}管理員的文字留言（選填）
       </h3>
       <p class="text-sm text-gray-600 mb-4">
         如果您有任何建議或認為需要改善的地方，可以在此留言給管理員。<br>
-        <strong class="text-orange-700">此留言只有三重居托中心管理人員能看到，托育人員不會看到您的留言內容。</strong>
+        <strong class="text-orange-700">此留言只有${escapeHtml(CENTER_INFO.shortName)}管理人員能看到，托育人員不會看到您的留言內容。</strong>
         ${state.currentComment ? '<br><strong class="text-red-600">留言提交後無法修改，請謹慎填寫。</strong>' : '<br><strong class="text-red-600">⚠️ 留言只能提交一次，提交後無法修改，請謹慎填寫。</strong>'}
       </p>
       
@@ -350,8 +350,8 @@ function renderSubmittedComment() {
     </div>
     <div class="text-center py-4 bg-green-50 rounded-lg border-2 border-green-200">
       <p class="text-green-700 font-semibold">✅ 留言已提交，無法修改</p>
-      <p class="text-xs text-gray-600 mt-1">三重居托中心人員會查看您的留言並進行處理</p>
-      <p class="text-xs text-green-700 mt-2">如需修改留言，請聯絡三重居托中心：<a href="tel:${CENTER_INFO.phone}" class="font-bold underline hover:text-green-900">${CENTER_INFO.phone}</a></p>
+      <p class="text-xs text-gray-600 mt-1">${escapeHtml(CENTER_INFO.shortName)}人員會查看您的留言並進行處理</p>
+      <p class="text-xs text-green-700 mt-2">如需修改留言，請聯絡${escapeHtml(CENTER_INFO.shortName)}：<a href="tel:${escapeHtml(CENTER_INFO.phone)}" class="font-bold underline hover:text-green-900">${escapeHtml(CENTER_INFO.phone)}</a></p>
     </div>
   `;
 }

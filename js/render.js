@@ -118,6 +118,7 @@ function renderNavigationButtons() {
 function renderMainContent() {
   return `
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      ${SUPABASE_CONFIGURED ? '' : renderNotConfiguredNotice()}
       ${getPageContent()}
     </main>
   `;
@@ -150,21 +151,31 @@ function getPageContent() {
   }
 }
 
+// js/config.js 仍為佔位值時的提示（給部署者看）
+function renderNotConfiguredNotice() {
+  return `
+    <div class="mb-8 p-4 bg-red-50 border-2 border-red-300 text-red-800 rounded-lg">
+      <p class="font-bold">系統尚未設定</p>
+      <p class="text-sm mt-1">請在 js/config.js 填入 Supabase 專案的 URL 與 anon key，並將 CENTER_INFO 改為貴單位的聯絡資訊。詳見 README。</p>
+    </div>
+  `;
+}
+
 function renderFooter() {
   return `
     <footer class="bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 mt-20">
       <div class="max-w-7xl mx-auto px-4 py-8">
         <div class="text-center text-white space-y-2">
-          <p class="text-sm font-semibold">© ${CENTER_INFO.name} All Rights Reserved.</p>
+          <p class="text-sm font-semibold">© ${escapeHtml(CENTER_INFO.name)} All Rights Reserved.</p>
           <div class="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-xs text-yellow-100">
-            <span>📍 地址：${CENTER_INFO.address}</span>
-            <span>📞 電話：<a href="tel:${CENTER_INFO.phone}" class="hover:text-white underline">${CENTER_INFO.phone}</a></span>
-            <span>📠 傳真：${CENTER_INFO.fax}</span>
-            <span>📧 電子郵件：<a href="mailto:${CENTER_INFO.email}" class="hover:text-white underline">${CENTER_INFO.email}</a></span>
+            <span>📍 地址：${escapeHtml(CENTER_INFO.address)}</span>
+            <span>📞 電話：<a href="tel:${escapeHtml(CENTER_INFO.phone)}" class="hover:text-white underline">${escapeHtml(CENTER_INFO.phone)}</a></span>
+            ${CENTER_INFO.fax ? `<span>📠 傳真：${escapeHtml(CENTER_INFO.fax)}</span>` : ''}
+            <span>📧 電子郵件：<a href="mailto:${escapeHtml(CENTER_INFO.email)}" class="hover:text-white underline">${escapeHtml(CENTER_INFO.email)}</a></span>
           </div>
           <div class="mt-3 flex justify-center items-center gap-4">
-            <a href="${CENTER_INFO.website}" target="_blank" rel="noopener" class="text-xs text-yellow-100 underline decoration-1 hover:text-white">🌐 中心網站</a>
-            <a href="${CENTER_INFO.facebook}" target="_blank" rel="noopener" class="text-xs text-yellow-100 underline decoration-1 hover:text-white">🔵 Facebook</a>
+            ${safeLinkUrl(CENTER_INFO.website) ? `<a href="${escapeHtml(safeLinkUrl(CENTER_INFO.website))}" target="_blank" rel="noopener" class="text-xs text-yellow-100 underline decoration-1 hover:text-white">🌐 中心網站</a>` : ''}
+            ${safeLinkUrl(CENTER_INFO.facebook) ? `<a href="${escapeHtml(safeLinkUrl(CENTER_INFO.facebook))}" target="_blank" rel="noopener" class="text-xs text-yellow-100 underline decoration-1 hover:text-white">🔵 Facebook</a>` : ''}
           </div>
           <p class="text-xs mt-3 text-yellow-100">提供專業、安全、溫馨的托育服務</p>
         </div>
