@@ -7,8 +7,14 @@ async function fetchAPI(endpoint, options = {}) {
     'Content-Type': 'application/json'
   };
 
-  if (state.user && state.user.token) {
-    defaultHeaders['Authorization'] = `Bearer ${state.user.token}`;
+  // 已登入的請求：token 過期就不送出，直接導回登入頁
+  const sentToken = state.user && state.user.token;
+  if (sentToken) {
+    if (!state.user.isRecovery && isTokenExpired(sentToken)) {
+      handleSessionExpired();
+      return new Response(null, { status: 401, statusText: 'Session expired' });
+    }
+    defaultHeaders['Authorization'] = `Bearer ${sentToken}`;
   }
 
   const response = await fetch(`${SUPABASE_URL}${endpoint}`, {
@@ -18,6 +24,11 @@ async function fetchAPI(endpoint, options = {}) {
       ...options.headers
     }
   });
+
+  // 帶使用者 token 卻收到 401 = token 失效（權限不足時已登入者收到的是 403）
+  if (response.status === 401 && sentToken && state.user && state.user.token === sentToken && !state.user.isRecovery) {
+    handleSessionExpired();
+  }
 
   return response;
 }

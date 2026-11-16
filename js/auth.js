@@ -29,6 +29,37 @@ function clearSession() {
   }
 }
 
+// ── 登入逾時處理 ──────────────────────────────────────────────────
+// access token 預設一小時後過期。本系統不保存 refresh token，過期後須重新登入。
+
+// 讀取 JWT 的 exp（秒）；格式不符時回傳 null（不在前端驗證簽章，僅用來判斷是否過期）
+function getTokenExpiry(token) {
+  try {
+    const payload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    const exp = JSON.parse(atob(payload)).exp;
+    return typeof exp === 'number' ? exp : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+// token 已過期（或 30 秒內即將過期）
+function isTokenExpired(token) {
+  const exp = getTokenExpiry(token);
+  return exp !== null && exp * 1000 <= Date.now() + 30 * 1000;
+}
+
+// 登入逾時：清除登入狀態並導回登入頁
+function handleSessionExpired() {
+  if (!state.user) return;
+  resetState();
+  clearSession();
+  state.currentPage = 'login';
+  state.error = '登入已逾時，請重新登入';
+  render();
+  fetchNews();
+}
+
 // 依 token 向伺服器查詢使用者身分，回傳 state.user 物件；token 無效或查無身分時回傳 null
 async function loadUserContext(userId, token) {
   const role = await determineUserRole(userId, token);
@@ -72,6 +103,11 @@ async function enterApp(defaultPages) {
 async function checkUser() {
   const token = readSessionToken();
   if (!token) return;
+
+  if (isTokenExpired(token)) {
+    clearSession();
+    return;
+  }
 
   try {
     // 向 Supabase Auth 驗證 token 並取得使用者 id
@@ -237,8 +273,24 @@ async function determineUserRole(userId, token) {
 }
 
 // 登出
+// 登出：先清除前端狀態，再通知伺服器撤銷此次登入（refresh token 與 session）
 function handleLogout() {
+  const token = state.user && state.user.token;
+
   resetState();
   clearSession();
   render();
+  fetchNews();
+
+  if (token && !isTokenExpired(token)) {
+    // scope=local：只登出這個瀏覽器，不影響同一帳號在其他裝置的登入
+    fetch(`${SUPABASE_URL}/auth/v1/logout?scope=local`, {
+      method: 'POST',
+      keepalive: true,
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${token}`
+      }
+    }).catch(error => console.error('伺服器端登出失敗:', error));
+  }
 }

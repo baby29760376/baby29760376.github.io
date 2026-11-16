@@ -109,7 +109,16 @@ async function handleChangePassword() {
     });
 
     if (!updateResponse.ok) {
-      const err = await updateResponse.json();
+      const err = await updateResponse.json().catch(() => ({}));
+
+      // 首次登入改密碼途中登入逾時（Supabase Auth 對無效或已撤銷的 token 回 401 / 403）
+      const sessionInvalid = updateResponse.status === 401 ||
+        (updateResponse.status === 403 && ['bad_jwt', 'session_not_found', 'session_expired', 'no_authorization'].includes(err.error_code));
+      if (sessionInvalid && !isRecovery) {
+        handleSessionExpired();
+        return;
+      }
+
       console.error('密碼更新失敗:', err);
       state.error = '密碼更新失敗，連結可能已過期，請重新申請重置密碼';
       render();

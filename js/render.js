@@ -123,7 +123,14 @@ function renderMainContent() {
   `;
 }
 
+// 需要登入才能看的頁面；未登入（例如登入逾時後）一律改顯示登入頁
+const LOGIN_REQUIRED_PAGES = ['change-password', 'profile', 'evaluate', 'evaluate-detail', 'admin-dashboard', 'admin-provider-detail'];
+
 function getPageContent() {
+  if (!state.user && LOGIN_REQUIRED_PAGES.includes(state.currentPage)) {
+    state.currentPage = 'login';
+  }
+
   switch (state.currentPage) {
     case 'home':
       return renderHomePage();
