@@ -1,26 +1,107 @@
 // 登入/登出相關函數
 
-// 檢查登入狀態
-function checkUser() {
-  const storedUser = sessionStorage.getItem('childcare_user');
-  if (storedUser) {
-    state.user = JSON.parse(storedUser);
-    state.userRole = state.user.role;
+// ── 登入狀態保存 ────────────────────────────────────────────────
+// sessionStorage 只保存 access token。使用者 id、角色與是否已改密碼
+// 每次載入頁面都向伺服器重新查詢，不在瀏覽器端保存。
+const SESSION_TOKEN_KEY = 'childcare_token';
 
-    // 若尚未改密碼，強制跳到改密碼頁
-    if (state.user.password_changed === false) {
-      state.currentPage = 'change-password';
+function saveSessionToken(token) {
+  try {
+    sessionStorage.setItem(SESSION_TOKEN_KEY, token);
+  } catch (error) {
+    console.error('無法保存登入狀態:', error);
+  }
+}
+
+function readSessionToken() {
+  try {
+    return sessionStorage.getItem(SESSION_TOKEN_KEY);
+  } catch (error) {
+    return null;
+  }
+}
+
+function clearSession() {
+  try {
+    sessionStorage.removeItem(SESSION_TOKEN_KEY);
+  } catch (error) {
+    // 無法存取 sessionStorage 時不需處理
+  }
+}
+
+// 依 token 向伺服器查詢使用者身分，回傳 state.user 物件；token 無效或查無身分時回傳 null
+async function loadUserContext(userId, token) {
+  const role = await determineUserRole(userId, token);
+  if (!role) return null;
+
+  // 檢查是否已改過密碼（管理員不需要）
+  let passwordChanged = true;
+  if (role === 'provider' || role === 'parent') {
+    passwordChanged = await checkPasswordChanged(userId, token, role);
+  }
+
+  return {
+    id: userId,
+    token: token,
+    role: role,
+    password_changed: passwordChanged
+  };
+}
+
+// 依使用者狀態導向對應頁面並載入資料
+async function enterApp(defaultPages) {
+  if (!state.user.password_changed) {
+    state.currentPage = 'change-password';
+    render();
+    return;
+  }
+
+  if (state.userRole === 'provider') {
+    if (defaultPages) state.currentPage = 'profile';
+    await fetchProviderData();
+  } else if (state.userRole === 'parent') {
+    if (defaultPages) state.currentPage = 'evaluate';
+    await fetchParentData();
+  } else if (state.userRole === 'admin') {
+    if (defaultPages) state.currentPage = 'admin-dashboard';
+    await fetchAdminData();
+  }
+}
+
+// 重新載入頁面時，用保存的 token 還原登入狀態
+async function checkUser() {
+  const token = readSessionToken();
+  if (!token) return;
+
+  try {
+    // 向 Supabase Auth 驗證 token 並取得使用者 id
+    const userResponse = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!userResponse.ok) {
+      // token 過期或無效
+      clearSession();
       render();
       return;
     }
 
-    if (state.userRole === 'provider') {
-      fetchProviderData();
-    } else if (state.userRole === 'parent') {
-      fetchParentData();
-    } else if (state.userRole === 'admin') {
-      fetchAdminData();
+    const authUser = await userResponse.json();
+    const user = await loadUserContext(authUser.id, token);
+    if (!user) {
+      clearSession();
+      render();
+      return;
     }
+
+    state.user = user;
+    state.userRole = user.role;
+    await enterApp(false);
+  } catch (error) {
+    console.error('還原登入狀態失敗:', error);
   }
 }
 
@@ -51,51 +132,21 @@ async function handleLogin(email, password) {
       return;
     }
 
-    const userId = authData.user.id;
     const token = authData.access_token;
+    const user = await loadUserContext(authData.user.id, token);
 
-    const userRole = await determineUserRole(userId, token);
-
-    if (!userRole) {
+    if (!user) {
       state.error = '此帳號未註冊為托育人員、家長或管理員';
       render();
       return;
     }
 
-    // 檢查是否已改過密碼（管理員不需要）
-    let passwordChanged = true;
-    if (userRole === 'provider' || userRole === 'parent') {
-      passwordChanged = await checkPasswordChanged(userId, token, userRole);
-    }
+    state.user = user;
+    state.userRole = user.role;
+    saveSessionToken(token);
 
-    state.user = {
-      id: userId,
-      email: authData.user.email,
-      token: token,
-      role: userRole,
-      password_changed: passwordChanged
-    };
-    state.userRole = userRole;
-    sessionStorage.setItem('childcare_user', JSON.stringify(state.user));
-
-    // 尚未改密碼 → 強制跳到改密碼頁
-    if (!passwordChanged) {
-      state.currentPage = 'change-password';
-      render();
-      return;
-    }
-
-    // 已改密碼 → 正常進入系統
-    if (userRole === 'provider') {
-      state.currentPage = 'profile';
-      await fetchProviderData();
-    } else if (userRole === 'parent') {
-      state.currentPage = 'evaluate';
-      await fetchParentData();
-    } else if (userRole === 'admin') {
-      state.currentPage = 'admin-dashboard';
-      await fetchAdminData();
-    }
+    // 尚未改密碼 → 強制跳到改密碼頁；已改密碼 → 正常進入系統
+    await enterApp(true);
 
   } catch (error) {
     console.error('登入錯誤:', error);
@@ -188,6 +239,6 @@ async function determineUserRole(userId, token) {
 // 登出
 function handleLogout() {
   resetState();
-  sessionStorage.removeItem('childcare_user');
+  clearSession();
   render();
 }
