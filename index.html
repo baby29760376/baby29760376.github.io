@@ -25,6 +25,12 @@
   <div id="app"></div>
 
   <!-- 載入所有 JavaScript 檔案 -->
+  <!-- 僅在本機載入 js/config.local.js（不進版控，見 js/config.local.example.js），正式環境不發此請求 -->
+  <script>
+    if (['localhost', '127.0.0.1'].includes(location.hostname)) {
+      document.write('<script src="js/config.local.js"><\/script>');
+    }
+  </script>
   <script src="js/config.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/state.js"></script>
