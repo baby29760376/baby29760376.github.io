@@ -15,7 +15,7 @@ function renderLoginPage() {
         <div class="p-8">
           ${state.error ? `
             <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
-              ${state.error}
+              ${escapeHtml(state.error)}
             </div>
           ` : ''}
           

@@ -26,8 +26,8 @@ function renderHomePage() {
           ${latestNews.length === 0 ? '<p class="text-gray-500 text-center py-8">目前沒有最新消息</p>' : ''}
           ${latestNews.map(news => `
             <div class="border-l-4 border-yellow-400 pl-4 py-2 hover:bg-yellow-50 transition rounded cursor-pointer"
-                 onclick="viewNewsDetail('${news.id}')">
-              <h4 class="font-semibold text-gray-800 mb-1">${news.title}</h4>
+                 onclick="viewNewsDetail('${safeId(news.id)}')">
+              <h4 class="font-semibold text-gray-800 mb-1">${escapeHtml(news.title)}</h4>
               <p class="text-xs text-gray-400">${new Date(news.published_date).toLocaleDateString('zh-TW')}</p>
             </div>
           `).join('')}

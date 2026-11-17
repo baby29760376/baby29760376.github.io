@@ -31,6 +31,10 @@
       document.write('<script src="js/config.local.js"><\/script>');
     }
   </script>
+  <!-- DOMPurify：清理 news.content_html 富文字；固定版本 + SRI，載入失敗時 sanitizeHtml() 會改為跳脫顯示 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.4.17/purify.min.js"
+          integrity="sha384-P0JNneQf81HOl9VwNXK76cQ9VMD6Nfsnepxb0cCOg8+UzEdzgPHAPV4wVQrvYQSx"
+          crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="js/config.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/state.js"></script>

@@ -47,8 +47,8 @@ function renderEvaluatePage() {
               <img src="images/parent-avatar.png" alt="家長" class="block w-full h-full object-cover">
             </div>
             <div>
-              <h2 class="text-2xl font-bold text-white">${state.parentData.name}</h2>
-              <p class="text-blue-100">${state.parentData.email}</p>
+              <h2 class="text-2xl font-bold text-white">${escapeHtml(state.parentData.name)}</h2>
+              <p class="text-blue-100">${escapeHtml(state.parentData.email)}</p>
             </div>
           </div>
         </div>
@@ -68,12 +68,12 @@ function renderEvaluatePage() {
           <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             ${state.assignedProviders.map(provider => `
               <div class="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl p-6 border-2 border-yellow-200 hover:border-yellow-400 hover:shadow-lg transition cursor-pointer"
-                   onclick="selectProvider(${JSON.stringify(provider).replace(/"/g, '&quot;')})">
+                   onclick="selectProvider('${safeId(provider.id)}')">
                 <div class="flex flex-col items-center text-center">
                   <div class="w-24 h-24 bg-white rounded-full mb-4 shadow-md overflow-hidden">
                     <img src="images/provider-avatar.png" alt="托育人員" class="block w-full h-full object-cover transform scale-110">
                   </div>
-                  <h3 class="text-xl font-bold text-gray-800 mb-3">${provider.name}</h3>
+                  <h3 class="text-xl font-bold text-gray-800 mb-3">${escapeHtml(provider.name)}</h3>
                   <button class="px-6 py-2 bg-gradient-to-r from-yellow-400 to-amber-400 text-white font-semibold rounded-lg hover:from-yellow-500 hover:to-amber-500 transition">
                     開始評價
                   </button>
@@ -87,7 +87,10 @@ function renderEvaluatePage() {
   `;
 }
 
-async function selectProvider(provider) {
+// 只接收經 safeId() 驗證的 ID，再從 state 取回完整資料（不把整個物件序列化進 onclick）
+async function selectProvider(providerId) {
+  const provider = state.assignedProviders.find(p => String(p.id) === providerId);
+  if (!provider) return;
   state.selectedProvider = provider;
   await fetchEvaluation(provider.id);
   await fetchComment(provider.id);
@@ -156,7 +159,7 @@ function renderProviderHeader(provider, hasEvaluated) {
           <img src="images/provider-avatar.png" alt="托育人員" class="block w-full h-full object-cover transform scale-110">
         </div>
         <div>
-          <h2 class="text-3xl font-bold text-white mb-2">${provider.name}</h2>
+          <h2 class="text-3xl font-bold text-white mb-2">${escapeHtml(provider.name)}</h2>
           <p class="text-yellow-100">${hasEvaluated ? '您已完成評價' : '正在評價這位托育人員'}</p>
         </div>
       </div>
@@ -268,7 +271,7 @@ function renderEvaluationSectionReadOnly(title, category, items, evaluation) {
 
 function renderEvaluationForm(providerId, evaluation) {
   return `
-    <form id="evaluationForm" onsubmit="handleSubmitEvaluation(event, '${providerId}')">
+    <form id="evaluationForm" onsubmit="handleSubmitEvaluation(event, '${safeId(providerId)}')">
       ${renderEvaluationSection('一、保親溝通', 'communication', EVALUATION_ITEMS.communication, evaluation)}
       ${renderEvaluationSection('二、托育活動安排', 'activity', EVALUATION_ITEMS.activity, evaluation)}
       ${renderEvaluationSection('三、作息安排與生活習慣', 'routine', EVALUATION_ITEMS.routine, evaluation)}
@@ -340,7 +343,7 @@ function renderSubmittedComment() {
         <span class="text-lg">💬</span>
         <div class="flex-1">
           <p class="text-sm font-bold text-green-700 mb-2">您已提交留言給管理員：</p>
-          <p class="text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded">${state.currentComment.comment}</p>
+          <p class="text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded">${escapeHtml(state.currentComment.comment)}</p>
           <p class="text-xs text-gray-500 mt-2">提交時間：${new Date(state.currentComment.created_at).toLocaleString('zh-TW')}</p>
         </div>
       </div>
@@ -360,7 +363,7 @@ function renderCommentInput(providerId) {
               placeholder="請輸入您的建議或意見..."
               class="w-full px-4 py-3 border-2 border-orange-200 rounded-lg focus:border-orange-400 focus:outline-none transition resize-none"></textarea>
     
-    <button onclick="saveComment('${providerId}')" 
+    <button onclick="saveComment('${safeId(providerId)}')" 
             class="mt-4 w-full py-3 bg-gradient-to-r from-orange-400 to-red-400 text-white font-bold rounded-lg hover:from-orange-500 hover:to-red-500 transition shadow-lg">
       📨 提交留言給管理員（僅此一次）
     </button>

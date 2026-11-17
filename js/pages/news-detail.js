@@ -15,7 +15,8 @@ function renderNewsDetailPage() {
     `;
   }
 
-  const hasImage = news.image_url;
+  // 只允許 https: 圖片網址，其他（javascript:、data: 等）直接不顯示圖片
+  const imageUrl = safeImageUrl(news.image_url);
 
   return `
     <div class="max-w-4xl mx-auto">
@@ -25,7 +26,7 @@ function renderNewsDetailPage() {
           <button onclick="navigateTo('home')" class="text-white hover:text-yellow-100 mb-4 flex items-center gap-2">
             ← 返回首頁
           </button>
-          <h1 class="text-lg md:text-3xl font-bold text-white mb-2 break-words">${news.title}</h1>
+          <h1 class="text-lg md:text-3xl font-bold text-white mb-2 break-words">${escapeHtml(news.title)}</h1>
           <p class="text-yellow-100">
             📅 ${new Date(news.published_date).toLocaleDateString('zh-TW', { 
               year: 'numeric', 
@@ -36,10 +37,10 @@ function renderNewsDetailPage() {
         </div>
 
         <!-- 封面圖片 -->
-        ${hasImage ? `
+        ${imageUrl ? `
           <div class="px-8 pt-8">
-            <img src="${news.image_url}" 
-                 alt="${news.title}" 
+            <img src="${escapeHtml(imageUrl)}" 
+                 alt="${escapeHtml(news.title)}" 
                  class="w-full max-h-96 object-contain rounded-xl shadow-lg"
                  onerror="this.parentElement.style.display='none'">
           </div>
@@ -48,7 +49,7 @@ function renderNewsDetailPage() {
         <!-- 內容 -->
         <div class="p-8">
           <div class="prose max-w-none text-gray-700 leading-relaxed space-y-4">
-            ${news.content_html || `<p>${news.content}</p>`}
+            ${news.content_html ? sanitizeHtml(news.content_html) : `<p>${escapeHtml(news.content)}</p>`}
           </div>
         </div>
 
