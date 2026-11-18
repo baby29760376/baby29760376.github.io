@@ -66,6 +66,17 @@ function safeImageUrl(value) {
   }
 }
 
+// 外部連結只允許 http(s) 絕對網址，其餘回傳空字串；回傳值仍須以 escapeHtml 放入屬性
+function safeLinkUrl(value) {
+  if (typeof value !== 'string' || value.trim() === '') return '';
+  try {
+    const url = new URL(value.trim());
+    return url.protocol === 'https:' || url.protocol === 'http:' ? url.href : '';
+  } catch (e) {
+    return '';
+  }
+}
+
 // 富文字 HTML（如 news.content_html）以 DOMPurify 清理；DOMPurify 未載入時退回跳脫，絕不輸出原始 HTML
 const SANITIZE_CONFIG = {
   USE_PROFILES: { html: true },

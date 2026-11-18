@@ -9,7 +9,7 @@ function renderForgotPasswordPage() {
             <span class="text-4xl">🔒</span>
           </div>
           <h2 class="text-2xl font-bold text-white">忘記密碼／首次登入</h2>
-          <p class="text-yellow-100 mt-2">請聯絡三重居托中心取得密碼</p>
+          <p class="text-yellow-100 mt-2">請聯絡${escapeHtml(CENTER_INFO.shortName)}取得密碼</p>
         </div>
 
         <div class="p-8">
@@ -24,14 +24,14 @@ function renderForgotPasswordPage() {
             <p class="text-gray-700 font-semibold">如需取得或重置密碼，請聯絡：</p>
 
             <div class="text-2xl font-bold text-orange-600">
-              📞 <a href="tel:02-29760376" class="hover:text-orange-800 transition">02-29760376</a>
+              📞 <a href="tel:${escapeHtml(CENTER_INFO.phone)}" class="hover:text-orange-800 transition">${escapeHtml(CENTER_INFO.phone)}</a>
             </div>
 
-            <p class="text-gray-500 text-sm">新北市三重區居家托育服務中心</p>
+            <p class="text-gray-500 text-sm">${escapeHtml(CENTER_INFO.name)}</p>
 
             <div class="pt-2 space-y-2 text-sm text-gray-500">
-              <p>📧 <a href="mailto:baby29760376@gmail.com" class="text-yellow-600 hover:underline">baby29760376@gmail.com</a></p>
-              <p>📍 三重區三和路三段81號2樓</p>
+              <p>📧 <a href="mailto:${escapeHtml(CENTER_INFO.email)}" class="text-yellow-600 hover:underline">${escapeHtml(CENTER_INFO.email)}</a></p>
+              <p>📍 ${escapeHtml(CENTER_INFO.address)}</p>
             </div>
           </div>
 

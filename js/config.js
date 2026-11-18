@@ -1,7 +1,13 @@
-// Supabase 設定
-// 預設連正式環境；若存在 js/config.local.js（不進版控）則改用其中設定，見 config.local.example.js
-const SUPABASE_URL = window.SUPABASE_OVERRIDE?.url ?? 'https://utszytwaabadivssondj.supabase.co';
-const SUPABASE_ANON_KEY = window.SUPABASE_OVERRIDE?.anonKey ?? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0c3p5dHdhYWJhZGl2c3NvbmRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjIzMzQ1MDIsImV4cCI6MjA3NzkxMDUwMn0.Tq2RlCaOegGV7I8jYqgFLHOLpm-bic1RTuIpRzuwqaY';
+// ── Supabase 設定（部署前必填）──────────────────────────────────────
+// 公開版只放佔位值。部署時請換成自己專案的 Project URL 與 anon (public) key
+// （Supabase Dashboard > Project Settings > API）。
+// 只能填 anon key，絕對不要填 service_role key。
+// 本機開發：複製 js/config.local.example.js 為 js/config.local.js（不進版控）即可覆寫，見 README。
+const SUPABASE_URL = window.SUPABASE_OVERRIDE?.url ?? 'https://YOUR-PROJECT-REF.supabase.co';
+const SUPABASE_ANON_KEY = window.SUPABASE_OVERRIDE?.anonKey ?? 'YOUR-SUPABASE-ANON-KEY';
+
+// 仍為佔位值時，頁面頂端會顯示「系統尚未設定」提示
+const SUPABASE_CONFIGURED = !SUPABASE_URL.includes('YOUR-PROJECT-REF') && !SUPABASE_ANON_KEY.startsWith('YOUR-');
 
 // ── 評價項目定義 ─────────────────────────────────────────────────
 const EVALUATION_ITEMS = {
@@ -46,14 +52,15 @@ const ICONS = {
   star: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>'
 };
 
-// 居托中心聯絡資訊
+// ── 居托中心聯絡資訊（部署前請改成自己單位的資料）─────────────────────
+// 下列為範例值。fax、website、facebook 留空字串即不顯示。
 const CENTER_INFO = {
-  name: '新北市三重區居家托育服務中心',
-  address: '新北市三重區三和路三段81號2樓',
-  phone: '02-29760376',
-  fax: '02-29760375',
-  email: 'baby29760376@gmail.com'
+  name: '○○市○○區居家托育服務中心',   // 完整名稱：頁尾、忘記密碼頁
+  shortName: '○○居托中心',              // 簡稱：家長評價頁等提示文字
+  address: '○○市○○區○○路○段○號',
+  phone: '02-0000-0000',
+  fax: '02-0000-0001',
+  email: 'center@example.org',
+  website: 'https://example.org/',
+  facebook: ''
 };
-
-CENTER_INFO.website = 'https://29760376.topschool.tw/Custom/02000';
-CENTER_INFO.facebook = 'https://www.facebook.com/people/%E4%B8%89%E9%87%8D%E5%B1%85%E5%AE%B6%E6%89%98%E8%82%B2%E6%9C%8D%E5%8B%99%E4%B8%AD%E5%BF%83/100082846032490/';
