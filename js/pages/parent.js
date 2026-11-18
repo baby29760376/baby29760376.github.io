@@ -6,7 +6,7 @@ function renderEvaluatePage() {
     return '';
   }
 
-  // 如果家長資料還在載入中
+  // 🔥 新增：如果家長資料還在載入中
   if (!state.parentData) {
     return `
       <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-12 text-center">
@@ -28,18 +28,7 @@ function renderEvaluatePage() {
 
   return `
     <div class="max-w-5xl mx-auto space-y-6">
-      <!-- 系統關閉提示 -->
-      <div class="bg-gradient-to-r from-red-50 to-orange-50 border-l-4 border-red-500 p-6 rounded-lg shadow-md">
-        <div class="flex items-start gap-3">
-          <div class="text-2xl">⚠️</div>
-          <div>
-            <p class="font-bold text-red-800 text-lg mb-1">系統使用期限提醒</p>
-            <p class="text-red-700">本系統僅開放至 <strong class="text-red-900">2026年10月31日 23:59</strong>，之後將關閉登入功能。</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- 家長個人資訊卡片 -->
+      <!-- 🔥 新增：家長個人資訊卡片 -->
       <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
         <div class="bg-gradient-to-r from-blue-400 to-indigo-400 px-8 py-6">
           <div class="flex items-center gap-4">
