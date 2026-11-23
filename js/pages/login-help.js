@@ -1,4 +1,4 @@
-// 忘記密碼頁面
+// 登入協助頁面（忘記密碼／首次登入的聯絡方式）
 
 function renderLoginHelpPage() {
   return `

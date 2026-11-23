@@ -1,4 +1,4 @@
-// 首次登入改密碼頁面
+// 帳號更新頁面（首次登入設定新密碼、重設密碼）
 
 function renderAccountUpdatePage() {
   const isRecovery = state.user && state.user.isRecovery;
@@ -51,7 +51,7 @@ function renderAccountUpdatePage() {
               <div class="relative">
                 <input type="password" id="confirmPassword" placeholder="請再次輸入新密碼"
                        class="w-full px-4 py-3 pr-12 border-2 border-gray-200 rounded-lg focus:border-yellow-400 focus:outline-none transition"
-                       onkeydown="if(event.key==='Enter') handleChangePassword()">
+                       onkeydown="if(event.key==='Enter') handleAccountUpdate()">
                 <button type="button" onclick="togglePasswordVisibility('confirmPassword')"
                         class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition p-1">
                   ${EYE_ICONS.closed}
@@ -59,7 +59,7 @@ function renderAccountUpdatePage() {
               </div>
             </div>
 
-            <button onclick="handleChangePassword()"
+            <button onclick="handleAccountUpdate()"
                     class="w-full py-3 bg-gradient-to-r from-yellow-400 to-amber-400 text-white font-bold rounded-lg hover:from-yellow-500 hover:to-amber-500 transition shadow-lg transform hover:scale-105">
               確認設定新密碼
             </button>
@@ -70,7 +70,7 @@ function renderAccountUpdatePage() {
   `;
 }
 
-async function handleChangePassword() {
+async function handleAccountUpdate() {
   const newPassword = document.getElementById('newPassword').value;
   const confirmPassword = document.getElementById('confirmPassword').value;
 
@@ -119,7 +119,7 @@ async function handleChangePassword() {
         return;
       }
 
-      console.error('密碼更新失敗:', err);
+      console.error('密碼更新失敗');
       state.error = '密碼更新失敗，連結可能已過期，請重新申請重置密碼';
       render();
       return;
@@ -171,7 +171,7 @@ async function handleChangePassword() {
     }
 
   } catch (error) {
-    console.error('改密碼錯誤:', error);
+    console.error('改密碼錯誤');
     state.error = '系統錯誤，請稍後再試';
     render();
   }
