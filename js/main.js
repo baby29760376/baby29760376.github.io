@@ -17,7 +17,7 @@ function init() {
         password_changed: false,
         isRecovery: true
       };
-      state.currentPage = 'change-password';
+      state.currentPage = 'account-update';
       fetchNews();
       render();
       return;

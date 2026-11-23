@@ -2,8 +2,8 @@
 
 function navigateTo(page) {
   // 若尚未改密碼，禁止跳離改密碼頁
-  if (state.user && state.user.password_changed === false && page !== 'change-password') {
-    state.currentPage = 'change-password';
+  if (state.user && state.user.password_changed === false && page !== 'account-update') {
+    state.currentPage = 'account-update';
     render();
     return;
   }
@@ -125,7 +125,7 @@ function renderMainContent() {
 }
 
 // 需要登入才能看的頁面；未登入（例如登入逾時後）一律改顯示登入頁
-const LOGIN_REQUIRED_PAGES = ['change-password', 'profile', 'evaluate', 'evaluate-detail', 'admin-dashboard', 'admin-provider-detail'];
+const LOGIN_REQUIRED_PAGES = ['account-update', 'profile', 'evaluate', 'evaluate-detail', 'admin-dashboard', 'admin-provider-detail'];
 
 function getPageContent() {
   if (!state.user && LOGIN_REQUIRED_PAGES.includes(state.currentPage)) {
@@ -137,9 +137,9 @@ function getPageContent() {
       return renderHomePage();
     case 'login':
       return renderLoginPage();
-    case 'forgot-password':
+    case 'login-help':
       return renderLoginHelpPage();
-    case 'change-password':
+    case 'account-update':
       return renderAccountUpdatePage();
     case 'profile':
       return renderProfilePage();

@@ -41,7 +41,7 @@ function renderLoginPage() {
 
               <!-- 忘記密碼連結 -->
               <div class="text-right mt-2">
-                <button onclick="navigateTo('forgot-password')"
+                <button onclick="navigateTo('login-help')"
                         class="text-sm text-yellow-600 hover:text-yellow-800 hover:underline transition">
                   忘記密碼／首次登入？
                 </button>

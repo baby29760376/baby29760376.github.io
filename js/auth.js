@@ -82,7 +82,7 @@ async function loadUserContext(userId, token) {
 // 依使用者狀態導向對應頁面並載入資料
 async function enterApp(defaultPages) {
   if (!state.user.password_changed) {
-    state.currentPage = 'change-password';
+    state.currentPage = 'account-update';
     render();
     return;
   }
