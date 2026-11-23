@@ -291,6 +291,9 @@ function handleLogout() {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`
       }
+    }).then(res => {
+      // fetch 遇到 HTTP 錯誤（401/403/5xx）不會 reject，要另外檢查
+      if (!res.ok) console.warn('伺服器端登出失敗');
     }).catch(() => {
       // 只記錄失敗本身，不輸出錯誤物件內容
       console.warn('伺服器端登出失敗');

@@ -6,7 +6,7 @@ function renderEvaluatePage() {
     return '';
   }
 
-  // 🔥 新增：如果家長資料還在載入中
+  // 如果家長資料還在載入中
   if (!state.parentData) {
     return `
       <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-12 text-center">
@@ -28,7 +28,7 @@ function renderEvaluatePage() {
 
   return `
     <div class="max-w-5xl mx-auto space-y-6">
-      <!-- 🔥 新增：家長個人資訊卡片 -->
+      <!-- 家長個人資訊卡片 -->
       <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
         <div class="bg-gradient-to-r from-blue-400 to-indigo-400 px-8 py-6">
           <div class="flex items-center gap-4">
