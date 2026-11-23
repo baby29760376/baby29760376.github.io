@@ -1,6 +1,6 @@
 // 忘記密碼頁面
 
-function renderForgotPasswordPage() {
+function renderLoginHelpPage() {
   return `
     <div class="max-w-md mx-auto">
       <div class="bg-white rounded-2xl shadow-xl overflow-hidden">

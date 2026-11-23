@@ -1,6 +1,6 @@
 // 首次登入改密碼頁面
 
-function renderChangePasswordPage() {
+function renderAccountUpdatePage() {
   const isRecovery = state.user && state.user.isRecovery;
 
   return `

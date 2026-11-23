@@ -138,9 +138,9 @@ function getPageContent() {
     case 'login':
       return renderLoginPage();
     case 'forgot-password':
-      return renderForgotPasswordPage();
+      return renderLoginHelpPage();
     case 'change-password':
-      return renderChangePasswordPage();
+      return renderAccountUpdatePage();
     case 'profile':
       return renderProfilePage();
     case 'evaluate':

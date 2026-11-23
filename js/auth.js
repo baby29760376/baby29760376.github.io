@@ -291,6 +291,9 @@ function handleLogout() {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${token}`
       }
-    }).catch(error => console.error('伺服器端登出失敗:', error));
+    }).catch(() => {
+      // 只記錄失敗本身，不輸出錯誤物件內容
+      console.warn('伺服器端登出失敗');
+    });
   }
 }
