@@ -20,8 +20,7 @@ const state = {
   news: [],
   selectedNewsId: null,
   currentPage: 'home',
-  error: '',
-  forgotPasswordSuccess: false
+  error: ''
 };
 
 // 狀態操作函數
@@ -48,5 +47,4 @@ function resetState() {
   state.selectedNewsId = null;
   state.currentPage = 'home';
   state.error = '';
-  state.forgotPasswordSuccess = false;
 }
